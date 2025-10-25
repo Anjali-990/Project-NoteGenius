@@ -1,0 +1,71 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  min-height: 100vh;
+  background-color: #f8f9fa;
+}
+
+/* Headings and text in main content */
+.main-content h1,
+.main-content p {
+  color: rgb(231, 231, 231);
+  font-weight: bolder;
+}
+
+/* Card image background */
+.card-img {
+  opacity: 0.6;
+  min-height: 100vh;
+  object-fit: cover;
+}
+
+/* Desktop Sidebar */
+@media (min-width: 768px) {
+  .desktop-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 220px;
+    height: 100vh;
+    background-color: #2c3e50;
+    padding-top: 1rem;
+    color: white;
+  }
+
+  .desktop-sidebar a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 15px;
+    display: block;
+  }
+
+  .desktop-sidebar a:hover {
+    background-color: #34495e;
+  }
+
+  .main-content {
+    margin-left: 220px;
+    padding: 20px;
+  }
+}
+
+/* Mobile Menu (Navbar) */
+@media (max-width: 767.98px) {
+  .mobile-menu .nav-link {
+    color: white;
+    padding: 10px 0;
+  }
+
+  .mobile-menu .nav-link:hover {
+    background-color: #34495e;
+  }
+
+  .main-content {
+    padding: 20px;
+  }
+}
