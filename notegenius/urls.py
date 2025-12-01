@@ -23,5 +23,7 @@ urlpatterns = [
     path('', views.home, name='home'),     # home page
     path('textup/', views.textup, name='textup'), # text upload
     path('savednotes/', views.savednotes, name='savednotes'), # saved notes
+    path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
+
 
 ]
