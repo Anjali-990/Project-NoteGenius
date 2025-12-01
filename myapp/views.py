@@ -3,6 +3,10 @@ from django.shortcuts import render
 # Create your views here.
 def home(req):
     return render(req,"home.html")
+def login_view(request):
+    return render(request, "login.html")
+def signup_view(request):
+    return render(request, "signup.html")
 def textup(req):
     return render(req,"textup.html")
 def savednotes(req):

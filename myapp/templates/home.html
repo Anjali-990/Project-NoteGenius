@@ -1,18 +1,39 @@
-{% extends "index.html" %} {% load static %} {% block main %}
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
 <div class="main-content card bg-dark">
   <img
-    src="static/images/img1.jpg"
+    src="{% static 'images/img1.jpg' %}"
     class="card-img"
     alt="AI workspace background"
   />
   <div
-    class="card-img-overlay position-absolute top-50 start-50 translate-middle text-center"
+    class="card-img-overlay position-absolute top-50 start-50 translate-middle text-center text-white"
   >
     <h1>Welcome to NoteGenius</h1>
-    <p class="card-text">
+    <p class="card-text mb-4">
       This is your AI-powered workspace to generate notes, Q&A, and quizzes from
       text, audio, or video.
     </p>
+
+    <!-- Login & Sign up buttons -->
+    <div class="d-flex gap-3 justify-content-center">
+      <button
+        type="button"
+        class="btn btn-outline-light"
+        onclick="window.location.href='{% url 'login' %}'"
+      >
+        Login
+      </button>
+
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick="window.location.href='{% url 'signup' %}'"
+      >
+        Sign up
+      </button>
+    </div>
   </div>
 </div>
 {% endblock %}

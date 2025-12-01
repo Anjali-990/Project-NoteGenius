@@ -21,6 +21,8 @@ from myapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),     # home page
+    path("login/", views.login_view, name="login"),
+    path("signup/", views.signup_view, name="signup"),
     path('textup/', views.textup, name='textup'), # text upload
     path('savednotes/', views.savednotes, name='savednotes'), # saved notes
     path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
