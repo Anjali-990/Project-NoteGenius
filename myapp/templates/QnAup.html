@@ -1,0 +1,132 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<!-- Main Content -->
+<section class="upload-section">
+  <div class="upload-card">
+    <h3>Upload to Generate Question and Answers</h3>
+    <p>
+      Paste your content or upload any file. Our AI assistant will summarize and
+      create question and answers format notes for you.
+    </p>
+
+    <!-- QnA Upload Form -->
+    <form id="qnaUploadForm" enctype="multipart/form-data">
+      <!-- File upload area -->
+      <div class="drop-area">
+        <i class="fas fa-file-circle-question"></i>
+        <h6>Drag & Drop your file here</h6>
+        <p class="text-muted">
+          Supports documents, PDFs, images, audio, and video files.
+        </p>
+        <p class="text-muted">or click below to select</p>
+
+        <input
+          type="file"
+          class="form-control mt-2"
+          id="qnaFileInput"
+          multiple
+          accept="
+            .pdf,
+            .doc,
+            .docx,
+            .txt,
+            .ppt,
+            .pptx,
+            image/*,
+            audio/*,
+            video/*
+          "
+        />
+      </div>
+
+      <!-- Text input area -->
+      <div class="my-3 text-start">
+        <label for="qnaTextInput" class="form-label fw-semibold text-secondary">
+          Or paste your text below:
+        </label>
+        <textarea
+          class="form-control"
+          id="qnaTextInput"
+          rows="6"
+          placeholder="Paste your content here..."
+        ></textarea>
+      </div>
+
+      <!-- Generate QnA button -->
+      <button type="submit" class="generate-btn w-100">
+        <i class="fas fa-wand-magic-sparkles me-2"></i>
+        Generate QnA
+      </button>
+    </form>
+
+    <!-- Result section -->
+    <div class="result-section d-none" id="qnaResultSection">
+      <h5 class="mt-4">
+        <i class="fas fa-circle-question me-2"></i> Generated QnA Notes:
+      </h5>
+      <p class="mt-2">
+        • The generated question and answer style notes will appear here after
+        processing.
+      </p>
+
+      <!-- You can later replace this <p> with dynamic content from backend -->
+      <div id="qnaOutput" class="mt-2">
+        <!-- Example placeholder -->
+        <!-- Q1: ... <br> A1: ... -->
+      </div>
+
+      <!-- Download as PDF button -->
+      <button
+        type="button"
+        id="downloadPdfBtn"
+        class="btn btn-outline-secondary mt-3 w-100"
+        disabled
+      >
+        <i class="fas fa-download me-2"></i>
+        Download QnA as PDF
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  // Simple front-end wiring placeholder
+  const qnaForm = document.getElementById("qnaUploadForm");
+  const resultSection = document.getElementById("qnaResultSection");
+  const downloadBtn = document.getElementById("downloadPdfBtn");
+  const qnaOutput = document.getElementById("qnaOutput");
+
+  // This will be replaced later with actual API/backend integration
+  qnaForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    // TODO: send file + text to backend via fetch/AJAX
+
+    // For now, just show the result section and enable download button
+    resultSection.classList.remove("d-none");
+    downloadBtn.disabled = false;
+
+    // Placeholder demo text (remove when connecting backend)
+    if (!qnaOutput.innerHTML.trim()) {
+      qnaOutput.innerHTML = `
+        <p class="mt-2">
+          <strong>Example Q1:</strong> What is the main idea of the content?<br />
+          <strong>Answer:</strong> The main idea will be summarized here based on your uploaded material.
+        </p>
+      `;
+    }
+  });
+
+  // Download button click handler (to be wired with backend PDF endpoint)
+  downloadBtn.addEventListener("click", function () {
+    // TODO: Replace with actual PDF download link from backend
+    // Example: window.location.href = "/download-qna-pdf/";
+    alert(
+      "PDF download will be enabled once this is connected to the backend."
+    );
+  });
+</script>
+
+{% endblock %}
