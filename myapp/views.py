@@ -12,7 +12,8 @@ def audio_upload(request):
 def video_upload(request):
     return render(request, "videoup.html")
 
-from django.shortcuts import render
 #(text_upload, audio_upload, video_upload, etc.)
 def qna_upload(request):
     return render(request, "QnAup.html") 
+def quiz_upload(request):
+    return render(request, "Quizup.html") 

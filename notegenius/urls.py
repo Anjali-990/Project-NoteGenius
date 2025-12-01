@@ -26,6 +26,6 @@ urlpatterns = [
     path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
     path("video-upload/", views.video_upload, name="video_upload"), #video upload
     path("qna-upload/", views.qna_upload, name="qna_upload"), #QnA generator upload
-
+     path("quiz-upload/", views.quiz_upload, name="quiz_upload"), #Quiz generator upload
 
 ]

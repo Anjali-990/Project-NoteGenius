@@ -1,0 +1,130 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<!-- Main Content -->
+<section class="upload-section">
+  <div class="upload-card">
+    <h3>Upload to Generate Quiz</h3>
+    <p>
+      Paste your content or upload any file. Our AI assistant will summarize and
+      generate quiz questions for you.
+    </p>
+
+    <!-- Quiz Upload Form -->
+    <form id="quizUploadForm" enctype="multipart/form-data">
+      <!-- File upload area -->
+      <div class="drop-area">
+        <i class="fas fa-list-check"></i>
+        <h6>Drag & Drop your file here</h6>
+        <p class="text-muted">
+          Supports documents, PDFs, images, audio, and video files.
+        </p>
+        <p class="text-muted">or click below to select</p>
+
+        <input
+          type="file"
+          class="form-control mt-2"
+          id="quizFileInput"
+          multiple
+          accept="
+            .pdf,
+            .doc,
+            .docx,
+            .txt,
+            .ppt,
+            .pptx,
+            image/*,
+            audio/*,
+            video/*
+          "
+        />
+      </div>
+
+      <!-- Text input area -->
+      <div class="my-3 text-start">
+        <label for="quizTextInput" class="form-label fw-semibold text-secondary">
+          Or paste your text below:
+        </label>
+        <textarea
+          class="form-control"
+          id="quizTextInput"
+          rows="6"
+          placeholder="Paste your content here..."
+        ></textarea>
+      </div>
+
+      <!-- Generate Quiz button -->
+      <button type="submit" class="generate-btn w-100">
+        <i class="fas fa-wand-magic-sparkles me-2"></i>
+        Generate Quiz
+      </button>
+    </form>
+
+    <!-- Result section -->
+    <div class="result-section d-none" id="quizResultSection">
+      <h5 class="mt-4">
+        <i class="fas fa-list-check me-2"></i> Generated Quiz:
+      </h5>
+      <p class="mt-2">
+        • The generated quiz questions (and options/answers if needed) will
+        appear here after processing.
+      </p>
+
+      <div id="quizOutput" class="mt-2">
+        <!-- Example placeholder content -->
+        <!-- Q1: ... <br> a) ... b) ... c) ... d) ... -->
+      </div>
+
+      <!-- Download as PDF button -->
+      <button
+        type="button"
+        id="quizDownloadPdfBtn"
+        class="btn btn-outline-secondary mt-3 w-100"
+        disabled
+      >
+        <i class="fas fa-download me-2"></i>
+        Download Quiz as PDF
+      </button>
+    </div>
+  </div>
+</section>
+
+<script>
+  const quizForm = document.getElementById("quizUploadForm");
+  const quizResultSection = document.getElementById("quizResultSection");
+  const quizDownloadBtn = document.getElementById("quizDownloadPdfBtn");
+  const quizOutput = document.getElementById("quizOutput");
+
+  // Form submit handler (frontend placeholder)
+  quizForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    // TODO: send file + text to backend via fetch/AJAX
+
+    // Show result section & enable download button (demo)
+    quizResultSection.classList.remove("d-none");
+    quizDownloadBtn.disabled = false;
+
+    if (!quizOutput.innerHTML.trim()) {
+      quizOutput.innerHTML = `
+        <p class="mt-2">
+          <strong>Sample Question 1:</strong> What is the main idea of the topic?<br />
+          a) Option A<br />
+          b) Option B<br />
+          c) Option C<br />
+          d) Option D<br />
+        </p>
+      `;
+    }
+  });
+
+  // Download button click handler (to connect with backend later)
+  quizDownloadBtn.addEventListener("click", function () {
+    // TODO: Replace with actual PDF download URL from backend
+    // Example: window.location.href = "/download-quiz-pdf/";
+    alert("PDF download for Quiz will work after backend is connected.");
+  });
+</script>
+
+{% endblock %}
