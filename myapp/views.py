@@ -9,3 +9,5 @@ def savednotes(req):
     return render(req,"savednotes.html")
 def audio_upload(request):
     return render(request, "audioup.html")
+def video_upload(request):
+    return render(request, "videoup.html")

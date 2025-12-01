@@ -1,0 +1,118 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<!-- Main Content -->
+<section class="upload-section">
+  <div class="upload-card">
+    <h3>Upload Video to Generate Notes</h3>
+    <p>
+      Upload your video file or record a short clip. Our AI assistant will extract
+      audio, convert speech to text, and generate clean summarized notes for you.
+    </p>
+
+    <form id="videoUploadForm">
+      <div class="drop-area">
+        <i class="fas fa-video"></i>
+        <h6>Drag & Drop your video file here</h6>
+        <p class="text-muted">or click below to select</p>
+
+        <input
+          type="file"
+          class="form-control mt-2"
+          accept="video/*,.mp4,.mkv,.mov"
+          id="videoInput"
+        />
+      </div>
+
+      <!-- Optional: Record video -->
+      <div class="my-3 text-start">
+        <label class="form-label fw-semibold text-secondary">
+          Or record a short video:
+        </label>
+
+        <div class="d-flex gap-2">
+          <button
+            type="button"
+            id="startVideoRecord"
+            class="btn btn-sm btn-outline-primary"
+          >
+            <i class="fas fa-circle-dot me-2"></i> Start Recording
+          </button>
+
+          <button
+            type="button"
+            id="stopVideoRecord"
+            class="btn btn-sm btn-outline-danger"
+            disabled
+          >
+            <i class="fas fa-square me-2"></i> Stop
+          </button>
+        </div>
+
+        <video
+          id="videoPreview"
+          controls
+          class="mt-3 w-100 d-none"
+        ></video>
+      </div>
+
+      <button type="submit" class="generate-btn w-100">
+        <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes
+      </button>
+    </form>
+
+    <div class="result-section d-none" id="videoResultSection">
+      <h5 class="mt-4">
+        <i class="fas fa-wand-magic-sparkles me-2"></i> Generated Notes:
+      </h5>
+      <p class="mt-2">
+        • Extracted and summarized notes will appear here after processing.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  // 🎥 Simple video recording (optional)
+  let videoRecorder;
+  let videoChunks = [];
+
+  const startVideo = document.getElementById("startVideoRecord");
+  const stopVideo = document.getElementById("stopVideoRecord");
+  const preview = document.getElementById("videoPreview");
+
+  startVideo.addEventListener("click", async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+    videoRecorder = new MediaRecorder(stream);
+
+    videoChunks = [];
+    videoRecorder.start();
+
+    startVideo.disabled = true;
+    stopVideo.disabled = false;
+
+    videoRecorder.ondataavailable = (e) => {
+      videoChunks.push(e.data);
+    };
+  });
+
+  stopVideo.addEventListener("click", () => {
+    videoRecorder.stop();
+
+    stopVideo.disabled = true;
+    startVideo.disabled = false;
+
+    videoRecorder.onstop = () => {
+      const videoBlob = new Blob(videoChunks, { type: "video/mp4" });
+      const url = URL.createObjectURL(videoBlob);
+
+      preview.src = url;
+      preview.classList.remove("d-none");
+
+      // Later: send videoBlob to backend for processing
+    };
+  });
+</script>
+
+{% endblock %}
