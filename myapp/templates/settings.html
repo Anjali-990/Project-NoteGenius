@@ -3,97 +3,140 @@
 
 {% block main %}
 
-<div class="container py-4">
+<section class="upload-section">
+  <div class="upload-card" style="max-width: 900px; margin: 0 auto;">
+    <h2 class="text-center mb-4">Settings</h2>
 
-  <h2 class="text-center mb-4">Settings</h2>
+    <div class="row g-4">
+      <!-- LEFT: ACCOUNT SETTINGS -->
+      <div class="col-md-5">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="mb-3">Account</h5>
 
-  <!-- ACCOUNT SETTINGS -->
-  <div class="card p-4 mb-4 shadow-sm">
-    <h5 class="mb-3">Account Settings</h5>
+            <p class="text-muted small mb-3">
+              Manage your NoteGenius account details and security.
+            </p>
 
-    <button class="btn btn-outline-primary w-100 mb-2">Change Password</button>
-    <button class="btn btn-outline-primary w-100 mb-2">Change Username</button>
-    <button class="btn btn-outline-danger w-100">Delete Account</button>
-  </div>
+            <div class="d-grid gap-2">
+              <button class="btn btn-outline-primary">
+                <i class="fas fa-lock me-2"></i> Change Password
+              </button>
+              <button class="btn btn-outline-primary">
+                <i class="fas fa-user-edit me-2"></i> Change Username
+              </button>
+              <button class="btn btn-outline-danger">
+                <i class="fas fa-user-times me-2"></i> Delete Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
-  <!-- PRIVACY SETTINGS -->
-  <div class="card p-4 mb-4 shadow-sm">
-    <h5 class="mb-3">Privacy</h5>
+      <!-- RIGHT: PRIVACY + NOTIFICATIONS -->
+      <div class="col-md-7">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <!-- Privacy -->
+            <h5 class="mb-3">Privacy</h5>
 
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <span>Profile Visibility</span>
-      <label class="switch">
-        <input type="checkbox" checked>
-        <span class="slider round"></span>
-      </label>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <div>Profile Visibility</div>
+                <small class="text-muted">Control who can see your profile.</small>
+              </div>
+              <label class="ng-switch">
+                <input type="checkbox" checked />
+                <span class="ng-slider ng-round"></span>
+              </label>
+            </div>
+
+            <button class="btn btn-outline-warning w-100 mb-4">
+              <i class="fas fa-trash-alt me-2"></i> Clear All Saved Notes
+            </button>
+
+            <hr />
+
+            <!-- Notifications -->
+            <h5 class="mb-3">Notifications</h5>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div>
+                <div>Email Notifications</div>
+                <small class="text-muted">Get updates and tips in your inbox.</small>
+              </div>
+              <label class="ng-switch">
+                <input type="checkbox" checked />
+                <span class="ng-slider ng-round"></span>
+              </label>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div>Push Notifications</div>
+                <small class="text-muted">Show alerts while using NoteGenius.</small>
+              </div>
+              <label class="ng-switch">
+                <input type="checkbox" />
+                <span class="ng-slider ng-round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
-    <button class="btn btn-outline-warning w-100">Clear All Saved Notes</button>
   </div>
+</section>
 
-  <!-- NOTIFICATION SETTINGS -->
-  <div class="card p-4 shadow-sm mb-5">
-    <h5 class="mb-3">Notifications</h5>
-
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <span>Email Notifications</span>
-      <label class="switch">
-        <input type="checkbox" checked>
-        <span class="slider round"></span>
-      </label>
-    </div>
-
-    <div class="d-flex justify-content-between align-items-center">
-      <span>Push Notifications</span>
-      <label class="switch">
-        <input type="checkbox">
-        <span class="slider round"></span>
-      </label>
-    </div>
-  </div>
-
-</div>
-
-<!-- Modern Toggle Switch CSS -->
+<!-- Switch styling (scoped) -->
 <style>
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 46px;
-  height: 24px;
-}
+  .ng-switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+  }
 
-.switch input {display:none;}
+  .ng-switch input {
+    display: none;
+  }
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0;
-  right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .3s;
-  border-radius: 24px;
-}
+  .ng-slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    transition: 0.3s;
+    border-radius: 24px;
+  }
 
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .3s;
-  border-radius: 50%;
-}
+  .ng-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #fff;
+    transition: 0.3s;
+    border-radius: 50%;
+  }
 
-input:checked + .slider {
-  background-color: #0d6efd;
-}
+  .ng-switch input:checked + .ng-slider {
+    background-color: #0d6efd;
+  }
 
-input:checked + .slider:before {
-  transform: translateX(22px);
-}
+  .ng-switch input:checked + .ng-slider:before {
+    transform: translateX(22px);
+  }
+
+  .ng-slider.ng-round {
+    border-radius: 24px;
+  }
+
+  .ng-slider.ng-round:before {
+    border-radius: 50%;
+  }
 </style>
 
 {% endblock %}
