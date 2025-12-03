@@ -21,11 +21,14 @@ from myapp import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),     # home page
+    path("login/", views.login_view, name="login"),
+    path("signup/", views.signup_view, name="signup"),
     path('textup/', views.textup, name='textup'), # text upload
     path('savednotes/', views.savednotes, name='savednotes'), # saved notes
     path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
     path("video-upload/", views.video_upload, name="video_upload"), #video upload
-
+    path("qna-upload/", views.qna_upload, name="qna_upload"), #QnA generator upload
+     path("quiz-upload/", views.quiz_upload, name="quiz_upload"), #Quiz generator upload
 
 ]
 
