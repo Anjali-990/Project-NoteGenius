@@ -11,3 +11,7 @@ def audio_upload(request):
     return render(request, "audioup.html")
 def video_upload(request):
     return render(request, "videoup.html")
+
+def profile_view(request):
+    return render(request, "profile.html")
+

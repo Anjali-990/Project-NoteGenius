@@ -1,0 +1,95 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<section class="upload-section">
+  <div class="upload-card" style="max-width: 650px; margin: 0 auto;">
+    <h2 class="mb-4 text-center">Your Profile</h2>
+
+    <!-- BASIC USER INFO -->
+    <div class="card p-4 mb-4">
+      <h5 class="mb-3">Basic Information</h5>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold text-secondary">Username</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="john_doe"
+            disabled
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label fw-semibold text-secondary">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            placeholder="john@example.com"
+            disabled
+          />
+        </div>
+      </div>
+
+      <!-- OCCUPATION DROPDOWN -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-secondary">Occupation</label>
+        <select class="form-select">
+          <option selected disabled>Select your occupation</option>
+          <option>Student</option>
+          <option>Teacher</option>
+          <option>Researcher</option>
+          <option>Working Professional</option>
+          <option>Freelancer</option>
+          <option>Other</option>
+        </select>
+      </div>
+
+      <!-- USING NOTEGENIUS MOSTLY FOR -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-secondary">Using NoteGenius mostly for</label>
+        <select class="form-select">
+          <option selected disabled>Choose one</option>
+          <option>Text Summarisation</option>
+          <option>Audio Summarisation</option>
+          <option>Video Summarisation</option>
+          <option>QnA Generation</option>
+          <option>Quiz Generation</option>
+        </select>
+      </div>
+
+      <!-- FEEDBACK / SUGGESTIONS -->
+      <div class="mb-3">
+        <label class="form-label fw-semibold text-secondary">Feedback / Suggestions</label>
+        <textarea
+          class="form-control"
+          rows="3"
+          placeholder="Share your thoughts..."
+        ></textarea>
+      </div>
+
+      <button class="btn btn-primary w-100 mt-2">Save Changes</button>
+    </div>
+
+    <!-- ACCOUNT SETTINGS -->
+    <div class="card p-4 mb-4">
+      <h5 class="mb-3">Account Settings</h5>
+
+      <button class="btn btn-outline-primary w-100 mb-2">Change Password</button>
+      <button class="btn btn-outline-primary w-100 mb-2">Change Email</button>
+      <button class="btn btn-outline-danger w-100">Delete Account</button>
+    </div>
+
+    <!-- USER ACTIVITY / STATS -->
+    <div class="card p-4">
+      <h5 class="mb-3">Your Activity</h5>
+      <p>Total Saved Notes: <strong>12</strong></p>
+      <p>Total Quizzes Generated: <strong>3</strong></p>
+      <p>Total QnA Created: <strong>5</strong></p>
+      <p>Last Active: <strong>2 hours ago</strong></p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

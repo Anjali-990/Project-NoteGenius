@@ -28,3 +28,7 @@ urlpatterns = [
 
 
 ]
+
+
+path("profile/", views.profile_view, name="profile"),
+
