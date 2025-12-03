@@ -16,14 +16,12 @@ def audio_upload(request):
 def video_upload(request):
     return render(request, "videoup.html")
 
-<<<<<<< HEAD
-def profile_view(request):
-    return render(request, "profile.html")
 
-=======
 #(text_upload, audio_upload, video_upload, etc.)
 def qna_upload(request):
     return render(request, "QnAup.html") 
 def quiz_upload(request):
     return render(request, "Quizup.html") 
->>>>>>> 8eb411a841db99a727768299cc1a8a12d8e04a15
+
+def profile(request):
+    return render(request, "profile.html")

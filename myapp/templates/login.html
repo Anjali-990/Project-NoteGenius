@@ -6,25 +6,33 @@
   <div class="upload-card" style="max-width: 450px; margin: 0 auto;">
     <h3 class="mb-3">Login to NoteGenius</h3>
     <p class="text-muted mb-4">
-      Welcome back! Enter your credentials to continue.
+      Use your email / mobile and password, or login with OTP.
     </p>
+
+    {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+    {% endif %}
 
     <form method="post">
       {% csrf_token %}
+
       <div class="mb-3 text-start">
-        <label class="form-label fw-semibold text-secondary" for="username">
-          Username or Email
+        <label class="form-label fw-semibold text-secondary" for="loginId">
+          Email or Mobile
         </label>
         <input
           type="text"
           class="form-control"
-          id="username"
-          name="username"
-          placeholder="Enter your username or email"
+          id="loginId"
+          name="login_id"
+          placeholder="Enter your email or mobile"
           required
         />
       </div>
 
+      <!-- Password login -->
       <div class="mb-3 text-start">
         <label class="form-label fw-semibold text-secondary" for="password">
           Password
@@ -35,7 +43,6 @@
           id="password"
           name="password"
           placeholder="Enter your password"
-          required
         />
       </div>
 
@@ -54,9 +61,47 @@
         <a href="#" class="small text-decoration-none">Forgot password?</a>
       </div>
 
-      <button type="submit" class="generate-btn w-100">
+      <button type="submit" class="generate-btn w-100 mb-3">
         <i class="fas fa-right-to-bracket me-2"></i>
-        Login
+        Login with password
+      </button>
+
+      <hr class="my-3" />
+
+      <!-- OTP login section (frontend) -->
+      <div class="mb-2 text-start">
+        <label class="form-label fw-semibold text-secondary">
+          Or login with OTP
+        </label>
+        <div class="d-flex gap-2 mb-2">
+          <button
+            type="button"
+            id="loginSendOtp"
+            class="btn btn-sm btn-outline-primary"
+          >
+            Send OTP
+          </button>
+          <span
+            id="loginOtpStatus"
+            class="small text-muted align-self-center"
+          >
+            OTP will be sent to your email / mobile.
+          </span>
+        </div>
+
+        <input
+          type="text"
+          class="form-control"
+          id="loginOtpInput"
+          name="login_otp"
+          placeholder="Enter OTP"
+          maxlength="6"
+          disabled
+        />
+      </div>
+
+      <button type="button" class="btn btn-outline-secondary w-100 mt-2">
+        Login with OTP
       </button>
     </form>
 
@@ -66,5 +111,23 @@
     </p>
   </div>
 </section>
+
+<script>
+  // FRONTEND ONLY – fake OTP flow for login
+  const loginSendOtpBtn = document.getElementById("loginSendOtp");
+  const loginOtpInput = document.getElementById("loginOtpInput");
+  const loginOtpStatus = document.getElementById("loginOtpStatus");
+
+  if (loginSendOtpBtn) {
+    loginSendOtpBtn.addEventListener("click", function () {
+      loginOtpInput.disabled = false;
+      loginOtpInput.focus();
+      loginOtpStatus.textContent =
+        "Dummy: OTP sent! (Frontend only, backend baad me connect hoga)";
+      loginOtpStatus.classList.remove("text-muted");
+      loginOtpStatus.classList.add("text-success");
+    });
+  }
+</script>
 
 {% endblock %}

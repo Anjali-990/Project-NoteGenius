@@ -9,6 +9,13 @@
       Sign up to start generating smart notes, QnA, and quizzes.
     </p>
 
+    <!-- optional error block (future backend ke liye) -->
+    {% if error %}
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+    {% endif %}
+
     <form method="post">
       {% csrf_token %}
 
@@ -37,6 +44,51 @@
           name="email"
           placeholder="Enter your email"
           required
+        />
+      </div>
+
+      <div class="mb-3 text-start">
+        <label class="form-label fw-semibold text-secondary" for="phone">
+          Mobile number (optional)
+        </label>
+        <input
+          type="tel"
+          class="form-control"
+          id="phone"
+          name="phone"
+          placeholder="Enter your mobile number"
+        />
+      </div>
+
+      <!-- OTP section -->
+      <div class="mb-3 text-start">
+        <label class="form-label fw-semibold text-secondary">
+          Verify with OTP
+        </label>
+        <div class="d-flex gap-2 mb-2">
+          <button
+            type="button"
+            id="signupSendOtp"
+            class="btn btn-sm btn-outline-primary"
+          >
+            Send OTP
+          </button>
+          <span
+            id="signupOtpStatus"
+            class="small text-muted align-self-center"
+          >
+            OTP will be sent to your email / mobile.
+          </span>
+        </div>
+
+        <input
+          type="text"
+          class="form-control"
+          id="signupOtpInput"
+          name="otp"
+          placeholder="Enter OTP"
+          maxlength="6"
+          disabled
         />
       </div>
 
@@ -80,5 +132,24 @@
     </p>
   </div>
 </section>
+
+<script>
+  // FRONTEND ONLY – fake OTP flow
+  const signupSendOtpBtn = document.getElementById("signupSendOtp");
+  const signupOtpInput = document.getElementById("signupOtpInput");
+  const signupOtpStatus = document.getElementById("signupOtpStatus");
+
+  if (signupSendOtpBtn) {
+    signupSendOtpBtn.addEventListener("click", function () {
+      // yahan baad me actual API call kar sakte ho
+      signupOtpInput.disabled = false;
+      signupOtpInput.focus();
+      signupOtpStatus.textContent =
+        "Dummy: OTP sent! (Frontend only, backend baad me connect hoga)";
+      signupOtpStatus.classList.remove("text-muted");
+      signupOtpStatus.classList.add("text-success");
+    });
+  }
+</script>
 
 {% endblock %}
