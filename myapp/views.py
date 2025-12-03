@@ -16,6 +16,9 @@ def audio_upload(request):
 def video_upload(request):
     return render(request, "videoup.html")
 
+def settings_page(request):
+    return render(request, "settings.html")
+
 
 #(text_upload, audio_upload, video_upload, etc.)
 def qna_upload(request):

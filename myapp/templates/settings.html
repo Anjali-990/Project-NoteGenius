@@ -1,0 +1,99 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block main %}
+
+<div class="container py-4">
+
+  <h2 class="text-center mb-4">Settings</h2>
+
+  <!-- ACCOUNT SETTINGS -->
+  <div class="card p-4 mb-4 shadow-sm">
+    <h5 class="mb-3">Account Settings</h5>
+
+    <button class="btn btn-outline-primary w-100 mb-2">Change Password</button>
+    <button class="btn btn-outline-primary w-100 mb-2">Change Username</button>
+    <button class="btn btn-outline-danger w-100">Delete Account</button>
+  </div>
+
+  <!-- PRIVACY SETTINGS -->
+  <div class="card p-4 mb-4 shadow-sm">
+    <h5 class="mb-3">Privacy</h5>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span>Profile Visibility</span>
+      <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <button class="btn btn-outline-warning w-100">Clear All Saved Notes</button>
+  </div>
+
+  <!-- NOTIFICATION SETTINGS -->
+  <div class="card p-4 shadow-sm mb-5">
+    <h5 class="mb-3">Notifications</h5>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span>Email Notifications</span>
+      <label class="switch">
+        <input type="checkbox" checked>
+        <span class="slider round"></span>
+      </label>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center">
+      <span>Push Notifications</span>
+      <label class="switch">
+        <input type="checkbox">
+        <span class="slider round"></span>
+      </label>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modern Toggle Switch CSS -->
+<style>
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 24px;
+}
+
+.switch input {display:none;}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0;
+  right: 0; bottom: 0;
+  background-color: #ccc;
+  transition: .3s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: .3s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #0d6efd;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+</style>
+
+{% endblock %}
