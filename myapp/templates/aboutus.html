@@ -1,0 +1,363 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<section class="upload-section">
+
+  <!-- Main Container -->
+  <div class="about-container">
+
+    <!-- INTRO -->
+    <div class="about-hero">
+      <h1>About Us</h1>
+      <p>
+        NoteGenius is a simple, smart study companion that turns long text, lectures,
+        and videos into clean, structured notes — instantly.
+      </p>
+
+      <div class="about-chips">
+        <span class="chip"><i class="fas fa-wand-magic-sparkles me-1"></i> AI-powered</span>
+        <span class="chip"><i class="fas fa-layer-group me-1"></i> Text · Audio · Video</span>
+        <span class="chip"><i class="fas fa-user-graduate me-1"></i> Built for learners</span>
+      </div>
+    </div>
+
+    <!-- SMALL STATS -->
+    <div class="about-stats">
+      <div class="stat-card">
+        <h4>5</h4>
+        <p>Team members behind NoteGenius</p>
+      </div>
+      <div class="stat-card">
+        <h4>3+</h4>
+        <p>Ways to create notes — text, audio, video</p>
+      </div>
+      <div class="stat-card">
+        <h4>1</h4>
+        <p>Place to manage all your study material</p>
+      </div>
+    </div>
+
+    <!-- WHY & WHAT -->
+    <div class="about-grid">
+      <div class="about-card">
+        <h3><i class="fas fa-bullseye text-primary me-2"></i>Why NoteGenius?</h3>
+        <p>
+          Students waste hours rewriting content instead of actually learning.
+          NoteGenius was built to solve that — to help you learn faster,
+          revise smarter, and save time.
+        </p>
+      </div>
+
+      <div class="about-card">
+        <h3><i class="fas fa-lightbulb text-primary me-2"></i>What it Does</h3>
+        <ul>
+          <li>Summarizes long text and PDFs.</li>
+          <li>Extracts key points from audio lectures.</li>
+          <li>Generates Q&amp;A notes for revision.</li>
+          <li>Creates quick quizzes for self-testing.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- HOW IT WORKS -->
+    <h2 class="section-title">How It Works</h2>
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <h4>Upload Content</h4>
+        <p>Text, PDF, audio, or video — anything works.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <h4>Choose Output</h4>
+        <p>Notes, Q&amp;A format, or quizzes.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <h4>Save &amp; Download</h4>
+        <p>Your study material organized beautifully.</p>
+      </div>
+    </div>
+
+    <!-- WHO IT'S FOR -->
+    <h2 class="section-title mt-4">Who Uses NoteGenius?</h2>
+
+    <div class="audience-grid">
+      <div class="audience-card">
+        <i class="fas fa-user-graduate audience-icon"></i>
+        <h4>Students</h4>
+        <p>For quick revision &amp; exam preparation.</p>
+      </div>
+
+      <div class="audience-card">
+        <i class="fas fa-chalkboard-teacher audience-icon"></i>
+        <h4>Teachers</h4>
+        <p>To create handouts &amp; Q&amp;A sheets instantly.</p>
+      </div>
+
+      <div class="audience-card">
+        <i class="fas fa-briefcase audience-icon"></i>
+        <h4>Professionals</h4>
+        <p>For meetings, trainings &amp; notes.</p>
+      </div>
+    </div>
+
+    <!-- TEAM MEMBERS -->
+    <h2 class="section-title mt-4">Our Team</h2>
+
+    <div class="team-grid">
+
+      <div class="team-card">
+        <div class="team-avatar">DA</div>
+        <h5>Dhruv Agarwal</h5>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar">DG</div>
+        <h5>Devanshi Gupta</h5>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar">AS</div>
+        <h5>Anjali Sharma</h5>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar">AM</div>
+        <h5>Ananya Misra</h5>
+      </div>
+
+      <div class="team-card">
+        <div class="team-avatar">AG</div>
+        <h5>Anupam Gangwar</h5>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+<style>
+  .about-container {
+    max-width: 950px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px 40px 40px;
+    border-radius: 16px;
+  }
+
+  .about-hero {
+    text-align: center;
+  }
+
+  .about-hero h1 {
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .about-subheading {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 4px;
+    color: #374151;
+  }
+
+  .about-hero p {
+    text-align: center;
+    font-size: 0.95rem;
+    color: #555;
+    margin-top: 6px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .about-chips {
+    margin-top: 12px;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .chip {
+    font-size: 0.8rem;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+  }
+
+  .about-stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 22px 0 10px;
+  }
+
+  .stat-card {
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px 16px;
+    border: 1px solid #e2e8f0;
+    text-align: center;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .stat-card h4 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #1d4ed8;
+  }
+
+  .stat-card p {
+    margin: 4px 0 0;
+    font-size: 0.8rem;
+    color: #555;
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin-top: 18px;
+  }
+
+  .about-card {
+    background: #f8fafc;
+    padding: 18px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .about-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+  }
+
+  .about-card ul li {
+    font-size: 0.9rem;
+    margin-bottom: 4px;
+  }
+
+  .section-title {
+    text-align: center;
+    font-size: 1.4rem;
+    margin-top: 32px;
+    font-weight: 600;
+  }
+
+  .steps-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .step-card {
+    background: #f8fafc;
+    padding: 18px;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .step-number {
+    width: 38px;
+    height: 38px;
+    background: #2563eb;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 10px;
+    font-weight: 600;
+  }
+
+  .audience-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .audience-card {
+    text-align: center;
+    background: #f8fafc;
+    padding: 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .audience-icon {
+    font-size: 26px;
+    color: #2563eb;
+    margin-bottom: 8px;
+  }
+
+  .team-grid {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 18px;
+  }
+
+  .team-card {
+    text-align: center;
+    background: #f8fafc;
+    padding: 18px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .team-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 8px;
+    font-weight: bold;
+  }
+
+  /* Hover effects */
+  .about-card:hover,
+  .step-card:hover,
+  .audience-card:hover,
+  .team-card:hover,
+  .stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+  }
+
+  @media (max-width: 900px) {
+    .about-container {
+      padding: 22px 18px 30px;
+    }
+    .about-grid {
+      grid-template-columns: 1fr;
+    }
+    .steps-grid,
+    .audience-grid {
+      grid-template-columns: 1fr;
+    }
+    .about-stats {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+{% endblock %}

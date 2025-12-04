@@ -31,7 +31,8 @@ urlpatterns = [
     path("quiz-upload/", views.quiz_upload, name="quiz_upload"), #Quiz generator upload
     path("profile/", views.profile, name="profile"),
     path("settings/", views.settings_page, name="settings"),
-
+    
+    path("about/", views.about, name="about"),
 ]
 
 
