@@ -1,54 +1,45 @@
-{% extends "index.html" %} {% load static %} {% block main %}
+{% extends "index.html" %}
+{% block main %}
 
-<!-- Main Content -->
-<section class="upload-section">
+<div class="container upload-section">
   <div class="upload-card">
-    <h3>Upload Text to Generate Notes</h3>
-    <p>
+
+    <h3 class="mb-2">Upload Text to Generate Notes</h3>
+    <p class="text-muted">
       Paste your content or upload a text file. Our AI assistant will summarize
       and create structured notes for you.
     </p>
 
-    <!-- Optionally wrap inputs in a form -->
     <form id="uploadForm">
-      <div class="drop-area">
-        <i class="fas fa-cloud-arrow-up"></i>
-        <h6>Drag & Drop your text file here</h6>
-        <p class="text-muted">or click below to select</p>
-        <input
-          type="file"
-          class="form-control mt-2"
-          accept=".txt,.pdf,.docx"
-          id="fileInput"
-        />
+
+      <!-- DROP AREA -->
+      <div class="drop-area mt-3">
+        <i class="fas fa-cloud-arrow-up upload-icon"></i>
+        <h6 class="mt-2">Drag & Drop your text file here</h6>
+        <p class="text-muted small">or click below to choose a file</p>
+        <input type="file" class="form-control mt-2" id="fileInput">
       </div>
 
-      <div class="my-3 text-start">
-        <label for="textInput" class="form-label fw-semibold text-secondary"
-          >Or paste your text below:</label
-        >
+      <!-- TEXT AREA -->
+      <div class="my-3">
+        <label class="form-label fw-semibold text-secondary">
+          Or paste your text below:
+        </label>
         <textarea
           class="form-control"
-          id="textInput"
           rows="6"
           placeholder="Paste your content here..."
         ></textarea>
       </div>
 
-      <button type="submit" class="generate-btn w-100">
+      <!-- BUTTON -->
+      <button class="generate-btn w-100">
         <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes
       </button>
+
     </form>
 
-    <div class="result-section d-none" id="resultSection">
-      <h5 class="mt-4">
-        <i class="fas fa-wand-magic-sparkles me-2"></i> Generated Notes:
-      </h5>
-      <p class="mt-2">
-        • Key concepts extracted from your content will appear here after
-        processing.
-      </p>
-    </div>
   </div>
-</section>
+</div>
+
 {% endblock %}

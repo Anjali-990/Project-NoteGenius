@@ -1,21 +1,19 @@
-{% extends "index.html" %}
-{% load static %}
-{% block main %}
+{% extends "index.html" %} {% load static %} {% block main %}
 
-<!-- Main Content -->
-<section class="upload-section">
-  <div class="upload-card">
-    <h3>Upload Audio to Generate Notes</h3>
-    <p>
-      Upload your audio file or record your voice. Our AI assistant will process
-      the speech and convert it into clean, structured notes.
+<section class="upload-section container">
+  <div class="upload-card mx-auto">
+    <h3 class="text-center">Upload Audio to Generate Notes</h3>
+    <p class="text-center text-muted">
+      Upload your audio file or record your voice. Our AI assistant will convert
+      speech into clean notes.
     </p>
 
     <form id="audioUploadForm">
-      <div class="drop-area">
+      <!-- Drop Area -->
+      <div class="drop-area text-center">
         <i class="fas fa-microphone-lines"></i>
         <h6>Drag & Drop your audio file here</h6>
-        <p class="text-muted">or click below to select</p>
+        <p class="text-muted mb-1">or click below to select</p>
 
         <input
           type="file"
@@ -25,17 +23,17 @@
         />
       </div>
 
-      <!-- Optional: Record Audio -->
-      <div class="my-3 text-start">
+      <!-- Recording Section -->
+      <div class="my-3">
         <label class="form-label fw-semibold text-secondary">
           Or record your voice:
         </label>
 
-        <div class="d-flex gap-2">
+        <div class="d-flex flex-wrap gap-2">
           <button
             type="button"
             id="startRecord"
-            class="btn btn-sm btn-outline-primary"
+            class="btn btn-outline-primary btn-sm"
           >
             <i class="fas fa-circle-dot me-2"></i> Start Recording
           </button>
@@ -43,18 +41,14 @@
           <button
             type="button"
             id="stopRecord"
-            class="btn btn-sm btn-outline-danger"
+            class="btn btn-outline-danger btn-sm"
             disabled
           >
             <i class="fas fa-square me-2"></i> Stop
           </button>
         </div>
 
-        <audio
-          id="audioPreview"
-          controls
-          class="mt-3 w-100 d-none"
-        ></audio>
+        <audio id="audioPreview" controls class="mt-3 w-100 d-none"></audio>
       </div>
 
       <button type="submit" class="generate-btn w-100">
@@ -62,19 +56,17 @@
       </button>
     </form>
 
+    <!-- Result Section -->
     <div class="result-section d-none" id="audioResultSection">
       <h5 class="mt-4">
         <i class="fas fa-wand-magic-sparkles me-2"></i> Generated Notes:
       </h5>
-      <p class="mt-2">
-        • Extracted notes from your audio will appear here after processing.
-      </p>
+      <p class="mt-2">• Extracted notes from your audio will appear here.</p>
     </div>
   </div>
 </section>
 
 <script>
-  // 🎙️ Basic Audio Recording (Optional)
   let mediaRecorder;
   let audioChunks = [];
 
@@ -85,7 +77,6 @@
   startBtn.addEventListener("click", async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     mediaRecorder = new MediaRecorder(stream);
-
     audioChunks = [];
     mediaRecorder.start();
 
@@ -99,7 +90,6 @@
 
   stopBtn.addEventListener("click", () => {
     mediaRecorder.stop();
-
     stopBtn.disabled = true;
     startBtn.disabled = false;
 
@@ -109,9 +99,6 @@
 
       audioPreview.src = audioURL;
       audioPreview.classList.remove("d-none");
-
-      // Optional: if you want to upload recorded audio,
-      // convert audioBlob → File and attach to form
     };
   });
 </script>

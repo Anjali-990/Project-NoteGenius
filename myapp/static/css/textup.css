@@ -1,138 +1,93 @@
-body {
-  background-color: #f5f9ff;
-  margin: 0;
-  height: 100vh;
+/* ----------- Layout Fixes ----------- */
+.sidebar {
+  background-color: #1f3349;
+  min-height: 100vh;
+}
+
+.main-content {
   overflow-x: hidden;
 }
 
-/* Sidebar fix: split between desktop and mobile */
-.desktop-sidebar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 220px;
-  height: 100vh;
-  background-color: #2c3e50;
-  padding-top: 1rem;
-  color: white;
-}
-
-.desktop-sidebar a {
-  color: white;
-  text-decoration: none;
-  padding: 10px 15px;
-  display: block;
-}
-
-.desktop-sidebar a:hover {
-  background-color: #34495e;
-}
-
-.mobile-menu a {
-  color: white;
-  text-decoration: none;
-  display: block;
-  padding: 10px 0;
-}
-
-.mobile-menu a:hover {
-  background-color: #34495e;
-}
-
+/* ----------- Upload Section ----------- */
 .upload-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 50px 20px;
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
 }
 
 .upload-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  max-width: 750px;
-  width: 100%;
-  text-align: center;
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.upload-card h3 {
-  font-weight: 700;
-  color: #2f9adf;
-  margin-bottom: 15px;
-}
-
-.upload-card p {
-  color: #6c757d;
-  margin-bottom: 25px;
-}
-
+/* Drop Zone */
 .drop-area {
-  border: 2px dashed #2f9adf;
+  border: 2px dashed #58a6ff;
+  padding: 35px 20px;
   border-radius: 12px;
-  padding: 40px;
-  background-color: #f9fcff;
-  transition: all 0.3s ease;
-  cursor: pointer;
+  background: #f3f9ff;
+  text-align: center;
+  transition: 0.3s ease;
 }
 
 .drop-area:hover {
-  background: #eaf4ff;
-  border-color: #339cff;
+  background: #e8f3ff;
+  border-color: #2b8cff;
 }
 
-.drop-area i {
-  font-size: 40px;
-  color: #2f9adf;
-  margin-bottom: 10px;
+.upload-icon {
+  font-size: 46px;
+  color: #2b8cff;
 }
 
-textarea {
-  width: 100%;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-  padding: 15px;
-  resize: none;
-  height: 150px;
-}
-
-/* Scope the button styles */
-.upload-card button {
-  background-color: #339cff;
-  border: none;
-  border-radius: 8px;
+/* Generate Button */
+.generate-btn {
+  background-color: #1f3349;
   color: white;
-  font-weight: 600;
-  width: 100%;
-  padding: 12px 20px;
-  transition: background 0.3s;
+  padding: 12px;
+  border: none;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  transition: 0.25s;
 }
 
-.upload-card button:hover {
-  background-color: #007bff;
+.generate-btn:hover {
+  background-color: #2a4b6b;
 }
 
-.result-section {
-  margin-top: 40px;
-  text-align: left;
-}
-
-.result-section h5 {
-  color: #2f9adf;
-  font-weight: 600;
-}
-
-/* Responsive layout fix */
-@media (min-width: 768px) {
-  .main-content,
-  .upload-section {
-    margin-left: 220px; /* Match sidebar width */
-    padding: 20px;
+/* ---------- Responsive Fixes ---------- */
+@media (max-width: 992px) {
+  .sidebar {
+    min-height: auto;
   }
 }
 
-@media (max-width: 767.98px) {
-  .main-content {
-    padding: 20px;
+@media (max-width: 768px) {
+  .upload-section {
+    padding: 10px;
+  }
+
+  .upload-card {
+    padding: 18px;
+  }
+
+  .drop-area {
+    padding: 25px 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  h3 {
+    font-size: 1.3rem;
+  }
+
+  .upload-icon {
+    font-size: 34px;
+  }
+
+  .drop-area {
+    padding: 20px 12px;
   }
 }

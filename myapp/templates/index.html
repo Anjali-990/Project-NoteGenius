@@ -18,15 +18,17 @@
     />
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/textup.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/savednotes.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/QnAup.css' %}" />
   </head>
 
   <body>
     <!-- Mobile Navbar -->
     <nav class="navbar navbar-expand-md navbar-dark bg-dark d-md-none">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">
+        <h4 class="text-white px-3 pt-3">
           <i class="fas fa-lightbulb"></i> NoteGenius
-        </a>
+        </h4>
         <button
           class="navbar-toggler"
           type="button"
@@ -49,22 +51,22 @@
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'audio_upload' %}"
                 ><i class="fas fa-microphone"></i> Audio Notes</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'video_upload' %}"
                 ><i class="fas fa-video"></i> Video Notes</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'qna_upload' %}"
                 ><i class="fas fa-question-circle"></i> Q&A Generator</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'quiz_upload' %}"
                 ><i class="fas fa-brain"></i> Quiz Generator</a
               >
             </li>
@@ -74,12 +76,12 @@
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'settings' %}"
                 ><i class="fas fa-cog"></i> Settings</a
               >
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="{% url 'profile' %}"
                 ><i class="fas fa-user"></i> Profile</a
               >
             </li>
@@ -105,15 +107,25 @@
       </h4>
       <a href="/"><i class="fas fa-home"></i> Dashboard</a>
       <a href="{% url 'textup'%}"><i class="fas fa-file-alt"></i> Text Notes</a>
-      <a href="{% url 'audio_upload' %}"><i class="fas fa-microphone"></i> Audio Notes</a>
-      <a href="{% url 'video_upload' %}"><i class="fas fa-video"></i> Video Notes</a>
-      <a href="{% url 'qna_upload' %}" class="nav-link"><i class="fas fa-question-circle"></i> Q&A Generator</a>
-      <a href="{% url 'quiz_upload' %}" class="nav-link"><i class="fas fa-brain"></i> Quiz Generator</a>
+      <a href="{% url 'audio_upload' %}"
+        ><i class="fas fa-microphone"></i> Audio Notes</a
+      >
+      <a href="{% url 'video_upload' %}"
+        ><i class="fas fa-video"></i> Video Notes</a
+      >
+      <a href="{% url 'qna_upload' %}" class="nav-link"
+        ><i class="fas fa-question-circle"></i> Q&A Generator</a
+      >
+      <a href="{% url 'quiz_upload' %}" class="nav-link"
+        ><i class="fas fa-brain"></i> Quiz Generator</a
+      >
       <a href="{% url 'savednotes' %}"
         ><i class="fas fa-book"></i> Saved Notes</a
       >
       <a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
-      <a href="{% url 'profile' %}" class="nav-link"><i class="fas fa-user"></i> Profile</a>
+      <a href="{% url 'profile' %}" class="nav-link"
+        ><i class="fas fa-user"></i> Profile</a
+      >
       <a href="#"><i class="fas fa-comment-dots"></i> Feedback</a>
       <a href="#"><i class="fas fa-circle-info"></i> About Us</a>
     </div>
@@ -125,4 +137,3 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   </body>
 </html>
-
