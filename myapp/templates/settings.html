@@ -3,17 +3,19 @@
 
 {% block main %}
 
-<section class="upload-section">
-  <div class="upload-card" style="max-width: 900px; margin: 0 auto;">
+<section class="settings-section">
+  <div
+    class="upload-card settings-card"
+    style="max-width: 900px; margin: 24px 40px 32px 480px;"
+  >
     <h2 class="text-center mb-4">Settings</h2>
 
     <div class="row g-4">
-      <!-- LEFT: ACCOUNT SETTINGS -->
+      <!-- LEFT: ACCOUNT -->
       <div class="col-md-5">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
             <h5 class="mb-3">Account</h5>
-
             <p class="text-muted small mb-3">
               Manage your NoteGenius account details and security.
             </p>
@@ -33,7 +35,7 @@
         </div>
       </div>
 
-      <!-- RIGHT: PRIVACY + NOTIFICATIONS -->
+      <!-- RIGHT: PRIVACY + NOTIFICATIONS + THEME -->
       <div class="col-md-7">
         <div class="card h-100 shadow-sm">
           <div class="card-body">
@@ -71,7 +73,7 @@
               </label>
             </div>
 
-            <div class="d-flex justify-content-between align-items-center">
+            <div class="d-flex justify-content-between align-items-center mb-4">
               <div>
                 <div>Push Notifications</div>
                 <small class="text-muted">Show alerts while using NoteGenius.</small>
@@ -81,6 +83,69 @@
                 <span class="ng-slider ng-round"></span>
               </label>
             </div>
+
+            <hr />
+
+            <!-- Appearance / Theme -->
+            <h5 class="mb-3">Appearance</h5>
+            <p class="text-muted small mb-2">
+              Choose how NoteGenius looks on your device.
+            </p>
+
+            <div class="row">
+              <div class="col-12 col-sm-4 mb-2">
+                <div class="form-check">
+                  <input
+                    class="form-check-input theme-radio"
+                    type="radio"
+                    name="theme"
+                    id="themeLight"
+                    value="light"
+                  />
+                  <label
+                    class="form-check-label appearance-label"
+                    for="themeLight"
+                  >
+                    Light
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 col-sm-4 mb-2">
+                <div class="form-check">
+                  <input
+                    class="form-check-input theme-radio"
+                    type="radio"
+                    name="theme"
+                    id="themeDark"
+                    value="dark"
+                  />
+                  <label
+                    class="form-check-label appearance-label"
+                    for="themeDark"
+                  >
+                    Dark
+                  </label>
+                </div>
+              </div>
+              <div class="col-12 col-sm-4 mb-2">
+                <div class="form-check">
+                  <input
+                    class="form-check-input theme-radio"
+                    type="radio"
+                    name="theme"
+                    id="themeSystem"
+                    value="system"
+                  />
+                  <label
+                    class="form-check-label appearance-label"
+                    for="themeSystem"
+                  >
+                    System default
+                  </label>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -88,8 +153,13 @@
   </div>
 </section>
 
-<!-- Switch styling (scoped) -->
+<!-- Styling -->
 <style>
+  .settings-section {
+    padding: 0;
+  }
+
+  /* toggle switch */
   .ng-switch {
     position: relative;
     display: inline-block;
@@ -137,6 +207,107 @@
   .ng-slider.ng-round:before {
     border-radius: 50%;
   }
+
+  /* theme text always visible */
+  .appearance-label {
+    margin-left: 4px;
+    font-size: 0.95rem;
+  }
+
+  body.theme-dark .appearance-label {
+    color: #f8f9fa;
+  }
+
+  body.theme-light .appearance-label {
+    color: #212529;
+  }
+
+  /* basic dark mode styles */
+  body.theme-dark {
+    background-color: #0b1622;
+    color: #f8f9fa;
+  }
+
+  body.theme-dark .upload-card,
+  body.theme-dark .settings-card {
+    background-color: #152238;
+    color: #f8f9fa;
+  }
+
+  body.theme-dark .card {
+    background-color: #1b2940;
+    border-color: #243654;
+  }
+
+  body.theme-dark .card .text-muted {
+    color: #cbd5f5 !important;
+  }
+
+  body.theme-dark a {
+    color: #e2e8ff;
+  }
+
+  body.theme-light {
+    background-color: #eef4ff;
+    color: #212529;
+  }
 </style>
+
+<!-- Theme toggle JS -->
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const radios = document.querySelectorAll(".theme-radio");
+
+    function getSystemTheme() {
+      return window.matchMedia &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+
+    function applyTheme(theme) {
+      const body = document.body;
+      body.classList.remove("theme-light", "theme-dark");
+
+      if (theme === "light") {
+        body.classList.add("theme-light");
+      } else if (theme === "dark") {
+        body.classList.add("theme-dark");
+      } else if (theme === "system") {
+        const sys = getSystemTheme();
+        body.classList.add("theme-" + sys);
+      }
+    }
+
+    const saved = localStorage.getItem("ng-theme") || "system";
+    applyTheme(saved);
+
+    const activeRadio = document.querySelector(
+      '.theme-radio[value="' + saved + '"]'
+    );
+    if (activeRadio) {
+      activeRadio.checked = true;
+    }
+
+    radios.forEach((radio) => {
+      radio.addEventListener("change", function () {
+        const value = this.value;
+        localStorage.setItem("ng-theme", value);
+        applyTheme(value);
+      });
+    });
+
+    if (window.matchMedia) {
+      window
+        .matchMedia("(prefers-color-scheme: dark)")
+        .addEventListener("change", () => {
+          const current = localStorage.getItem("ng-theme") || "system";
+          if (current === "system") {
+            applyTheme("system");
+          }
+        });
+    }
+  });
+</script>
 
 {% endblock %}
