@@ -28,3 +28,9 @@ def quiz_upload(request):
 
 def profile(request):
     return render(request, "profile.html")
+
+def about(request):
+    return render(request, "aboutus.html")
+
+def feedback(request):
+    return render(request, "feedback.html")

@@ -1,0 +1,348 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<section class="upload-section">
+  <div class="feedback-wrapper">
+
+    <!-- Heading -->
+    <div class="text-center mb-3">
+      <h1 class="feedback-title">Feedback</h1>
+      <p class="feedback-subtitle">
+        Help us make <strong>NoteGenius</strong> better. Tell us what you liked,
+        what felt confusing, or what we should improve next.
+      </p>
+    </div>
+
+    <!-- Two-column layout -->
+    <div class="feedback-grid">
+
+      <!-- LEFT : MAIN FORM -->
+      <div class="fb-card">
+        <form id="feedbackForm">
+
+          <!-- Experience rating (animated stars) -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">How was your overall experience?</label>
+            <div class="star-row">
+              <button type="button" class="star-btn" data-value="1">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-value="2">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-value="3">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-value="4">
+                <i class="fas fa-star"></i>
+              </button>
+              <button type="button" class="star-btn" data-value="5">
+                <i class="fas fa-star"></i>
+              </button>
+            </div>
+            <input type="hidden" id="ratingInput" name="rating" value="0">
+            <p class="star-caption small text-muted mt-1">
+              Tap a star to rate • 1 = poor, 5 = awesome
+            </p>
+          </div>
+
+          <!-- Category -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">What is this about?</label>
+            <select class="form-select">
+              <option selected disabled>Choose a category</option>
+              <option>Overall feedback</option>
+              <option>Text summarisation</option>
+              <option>Audio notes</option>
+              <option>Video notes</option>
+              <option>Q&A generator</option>
+              <option>Quiz generator</option>
+              <option>Design / UI</option>
+              <option>Bug / Something broke</option>
+              <option>Feature suggestion</option>
+              <option>Other</option>
+            </select>
+          </div>
+
+          <!-- Feedback text -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Your feedback</label>
+            <textarea
+              class="form-control"
+              rows="5"
+              placeholder="Write your feedback here..."
+            ></textarea>
+          </div>
+
+          <!-- Optional email -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Email (optional)</label>
+            <input
+              type="email"
+              class="form-control"
+              placeholder="If you want us to reach out"
+            />
+          </div>
+
+          <!-- Buttons -->
+          <div class="d-flex justify-content-end gap-2 mt-3">
+            <button type="reset" class="btn-outline-fb">Clear</button>
+            <button type="submit" class="btn-primary-fb">
+              <i class="fas fa-paper-plane me-1"></i> Submit Feedback
+            </button>
+          </div>
+
+        </form>
+      </div>
+
+      <!-- RIGHT : INFO ONLY -->
+      <div class="fb-card fb-side">
+        <h5 class="fw-semibold mb-2">Why your feedback matters</h5>
+        <p class="small mb-3">
+          We use your feedback to prioritise what to build:
+        </p>
+        <ul class="small mb-3">
+          <li>Better summaries & note quality</li>
+          <li>New export formats & flows</li>
+          <li>Smoother UI and fewer bugs</li>
+        </ul>
+
+        <div class="tip-box small">
+          💡 Tip: Be as specific as possible –
+          mention which page or feature you were using when you faced an issue.
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<style>
+  .feedback-wrapper {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px 24px 30px;
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #e5e7eb;
+  }
+
+  [data-theme="dark"] .feedback-wrapper {
+    background: #111827;
+    border-color: #1f2937;
+  }
+
+  .feedback-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .feedback-subtitle {
+    font-size: 0.95rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  [data-theme="dark"] .feedback-subtitle {
+    color: #9ca3af;
+  }
+
+  .feedback-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 2fr 1.2fr;
+    gap: 20px;
+    align-items: flex-start;
+  }
+
+  .fb-card {
+    background: #f9fafb;
+    border-radius: 14px;
+    padding: 18px 20px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.04);
+  }
+
+  [data-theme="dark"] .fb-card {
+    background: #020617;
+    border-color: #1f2937;
+    color: #e5e7eb;
+  }
+
+  .fb-side {
+    font-size: 0.9rem;
+  }
+
+  .tip-box {
+    margin-top: 6px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background: #eff6ff;
+    border: 1px dashed #2563eb;
+  }
+
+  [data-theme="dark"] .tip-box {
+    background: #020617;
+    border-color: #38bdf8;
+  }
+
+  /* ---------- STAR RATING (ANIMATED) ---------- */
+  .star-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  .star-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+    position: relative;
+  }
+
+  .star-btn i {
+    font-size: 20px;
+    color: #d1d5db; /* default grey */
+    transition: color 0.15s ease, transform 0.15s ease;
+  }
+
+  .star-btn:hover i {
+    color: #fde047; /* bright yellow on hover */
+    transform: translateY(-1px) scale(1.05);
+  }
+
+  .star-btn.active i {
+    color: #facc15; /* filled yellow */
+    filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.9));
+  }
+
+  /* Pop animation on click */
+  .star-btn.pop i {
+    animation: star-pop 0.28s ease-out;
+  }
+
+  @keyframes star-pop {
+    0% {
+      transform: scale(0.7) rotate(0deg);
+    }
+    60% {
+      transform: scale(1.35) rotate(-12deg);
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+    }
+  }
+
+  [data-theme="dark"] .star-btn i {
+    color: #4b5563;
+  }
+
+  [data-theme="dark"] .star-btn.active i {
+    color: #facc15;
+  }
+
+  .star-caption {
+    font-size: 0.75rem;
+  }
+
+  /* Buttons */
+  .btn-outline-fb {
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    padding: 7px 16px;
+    font-size: 0.9rem;
+    background: transparent;
+  }
+
+  .btn-primary-fb {
+    border-radius: 999px;
+    border: none;
+    padding: 7px 18px;
+    font-size: 0.9rem;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(37, 99, 235, 0.35);
+  }
+
+  @media (max-width: 900px) {
+    .feedback-wrapper {
+      padding: 18px;
+    }
+    .feedback-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  // Star rating selection with hover preview + pop animation
+  document.addEventListener("DOMContentLoaded", function () {
+    const stars = document.querySelectorAll(".star-btn");
+    const starRow = document.querySelector(".star-row");
+    const ratingInput = document.getElementById("ratingInput");
+
+    let currentRating = 0;
+
+    function applyRating(value) {
+      stars.forEach(star => {
+        const starVal = parseInt(star.getAttribute("data-value"), 10);
+        if (starVal <= value) {
+          star.classList.add("active");
+        } else {
+          star.classList.remove("active");
+        }
+      });
+    }
+
+    // On click – set rating + pop animation
+    stars.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const value = parseInt(btn.getAttribute("data-value"), 10);
+        currentRating = value;
+        ratingInput.value = value;
+        applyRating(value);
+
+        // pop animation
+        btn.classList.remove("pop");
+        void btn.offsetWidth; // restart animation trick
+        btn.classList.add("pop");
+        btn.addEventListener("animationend", () => {
+          btn.classList.remove("pop");
+        }, { once: true });
+      });
+
+      // Hover preview
+      btn.addEventListener("mouseenter", () => {
+        const hoverVal = parseInt(btn.getAttribute("data-value"), 10);
+        applyRating(hoverVal);
+      });
+    });
+
+    // When mouse leaves the star row – go back to selected rating
+    if (starRow) {
+      starRow.addEventListener("mouseleave", () => {
+        applyRating(currentRating);
+      });
+    }
+
+    // Prevent real submit (just UI)
+    const form = document.getElementById("feedbackForm");
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      alert("Feedback UI ready! Backend connection abhi baaki hai 🙂");
+    });
+  });
+</script>
+
+{% endblock %}
