@@ -3,82 +3,105 @@
 {% block main %}
 
 <section class="upload-section">
-  <div class="upload-card" style="max-width: 650px; margin: 0 auto;">
-    <h2 class="mb-4 text-center">Your Profile</h2>
+  <div
+    class="upload-card profile-card"
+    style="max-width: 900px; margin: 24px auto 32px auto;"
+  >
+    <h2 class="text-center mb-4">Your Profile</h2>
 
-    <!-- BASIC USER INFO -->
-    <div class="card p-4 mb-4">
-      <h5 class="mb-3">Basic Information</h5>
+    <div class="row g-4">
+      <!-- LEFT: BASIC INFO FORM -->
+      <div class="col-md-7">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <h5 class="mb-3 text-center">Basic Information</h5>
 
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-semibold text-secondary">Username</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="john_doe"
-            disabled
-          />
+            <!-- Username + Email -->
+            <div class="row mb-3">
+              <div class="col-sm-6 mb-2 mb-sm-0">
+                <label class="form-label small mb-1">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  value="john_doe"
+                  readonly
+                />
+              </div>
+              <div class="col-sm-6">
+                <label class="form-label small mb-1">Email</label>
+                <input
+                  type="email"
+                  class="form-control"
+                  value="john@example.com"
+                  readonly
+                />
+              </div>
+            </div>
+
+            <!-- Occupation -->
+            <div class="mb-3">
+              <label class="form-label small mb-1">Occupation</label>
+              <select class="form-select">
+                <option selected>Select your occupation</option>
+                <option>Student</option>
+                <option>Working Professional</option>
+                <option>Teacher / Professor</option>
+                <option>Researcher</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <!-- Using NoteGenius mostly for -->
+            <div class="mb-3">
+              <label class="form-label small mb-1">Using NoteGenius mostly for</label>
+              <select class="form-select">
+                <option selected>Choose one</option>
+                <option>Text summarisation</option>
+                <option>Audio notes</option>
+                <option>Video notes</option>
+                <option>Q&A generation</option>
+                <option>Quiz generation</option>
+              </select>
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-3">
+              <label class="form-label small mb-1">Bio</label>
+              <textarea
+                class="form-control"
+                rows="4"
+                placeholder="Write about yourself..."
+              ></textarea>
+            </div>
+
+            <div class="d-grid">
+              <button class="btn btn-primary">Save Changes</button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="col-md-6 mb-3">
-          <label class="form-label fw-semibold text-secondary">Email</label>
-          <input
-            type="email"
-            class="form-control"
-            placeholder="john@example.com"
-            disabled
-          />
+      <!-- RIGHT: ACTIVITY CARD -->
+      <div class="col-md-5">
+        <div class="card h-100 shadow-sm">
+          <div class="card-body text-center d-flex flex-column justify-content-center">
+            <h5 class="mb-3">Your Activity</h5>
+
+            <p class="mb-2">
+              Total Saved Notes: <strong>12</strong>
+            </p>
+            <p class="mb-2">
+              Total Quizzes Generated: <strong>3</strong>
+            </p>
+            <p class="mb-2">
+              Total QnA Created: <strong>5</strong>
+            </p>
+            <p class="mt-3 mb-0 text-muted small">
+              Last Active: <strong>2 hours ago</strong>
+            </p>
+          </div>
         </div>
       </div>
-
-      <!-- OCCUPATION DROPDOWN -->
-      <div class="mb-3">
-        <label class="form-label fw-semibold text-secondary">Occupation</label>
-        <select class="form-select">
-          <option selected disabled>Select your occupation</option>
-          <option>Student</option>
-          <option>Teacher</option>
-          <option>Researcher</option>
-          <option>Working Professional</option>
-          <option>Freelancer</option>
-          <option>Other</option>
-        </select>
-      </div>
-
-      <!-- USING NOTEGENIUS MOSTLY FOR -->
-      <div class="mb-3">
-        <label class="form-label fw-semibold text-secondary">Using NoteGenius mostly for</label>
-        <select class="form-select">
-          <option selected disabled>Choose one</option>
-          <option>Text Summarisation</option>
-          <option>Audio Summarisation</option>
-          <option>Video Summarisation</option>
-          <option>QnA Generation</option>
-          <option>Quiz Generation</option>
-        </select>
-      </div>
-
-      <!-- FEEDBACK / SUGGESTIONS -->
-      <div class="mb-3">
-        <label class="form-label fw-semibold text-secondary">Bio</label>
-        <textarea
-          class="form-control"
-          rows="3"
-          placeholder="Write about Yourself..."
-        ></textarea>
-      </div>
-
-      <button class="btn btn-primary w-100 mt-2">Save Changes</button>
-    </div>
-
-    <!-- USER ACTIVITY / STATS -->
-    <div class="card p-4">
-      <h5 class="mb-3">Your Activity</h5>
-      <p>Total Saved Notes: <strong>12</strong></p>
-      <p>Total Quizzes Generated: <strong>3</strong></p>
-      <p>Total QnA Created: <strong>5</strong></p>
-      <p>Last Active: <strong>2 hours ago</strong></p>
     </div>
   </div>
 </section>
