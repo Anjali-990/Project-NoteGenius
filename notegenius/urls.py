@@ -33,6 +33,7 @@ urlpatterns = [
     path("settings/", views.settings_page, name="settings"),
     
     path("about/", views.about, name="about"),
+    path("feedback/", views.feedback, name="feedback"),
 ]
 
 

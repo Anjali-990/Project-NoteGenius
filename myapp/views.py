@@ -31,3 +31,6 @@ def profile(request):
 
 def about(request):
     return render(request, "aboutus.html")
+
+def feedback(request):
+    return render(request, "feedback.html")
