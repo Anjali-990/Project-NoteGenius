@@ -1,30 +1,16 @@
-<<<<<<< HEAD
 {% extends "index.html" %} {% load static %} {% block main %}
 
-<section class="settings-section">
-  <div
-    class="upload-card settings-card"
-    style="max-width: 900px; margin: 24px 40px 32px 480px"
-  >
-    <h2 class="text-center mb-4">Settings</h2>
-=======
-{% extends "index.html" %}
-{% load static %}
-{% block main %}
-
 <section class="upload-section">
->>>>>>> eb38a38857f51a7c5d8122a152771ac97ce9c0b4
-
   <div class="settings-wrapper">
-
     <h1 class="settings-title">Settings</h1>
 
     <div class="settings-grid">
-
       <!-- ACCOUNT -->
       <div class="settings-card">
         <h2 class="section-heading">Account</h2>
-        <p class="section-sub">Manage your NoteGenius account details and security.</p>
+        <p class="section-sub">
+          Manage your NoteGenius account details and security.
+        </p>
 
         <button class="btn-setting primary">
           <i class="fas fa-lock me-2"></i> Change Password
@@ -39,129 +25,15 @@
 
       <!-- PRIVACY + NOTIFICATIONS + APPEARANCE -->
       <div class="settings-card">
-
-<<<<<<< HEAD
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div>
-                <div>Profile Visibility</div>
-                <small class="text-muted"
-                  >Control who can see your profile.</small
-                >
-              </div>
-              <label class="ng-switch">
-                <input type="checkbox" checked />
-                <span class="ng-slider ng-round"></span>
-              </label>
-            </div>
-
-            <button class="btn btn-outline-warning w-100 mb-4">
-              <i class="fas fa-trash-alt me-2"></i> Clear All Saved Notes
-            </button>
-
-            <hr />
-
-            <!-- Notifications -->
-            <h5 class="mb-3">Notifications</h5>
-
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <div>
-                <div>Email Notifications</div>
-                <small class="text-muted"
-                  >Get updates and tips in your inbox.</small
-                >
-              </div>
-              <label class="ng-switch">
-                <input type="checkbox" checked />
-                <span class="ng-slider ng-round"></span>
-              </label>
-            </div>
-
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <div>
-                <div>Push Notifications</div>
-                <small class="text-muted"
-                  >Show alerts while using NoteGenius.</small
-                >
-              </div>
-              <label class="ng-switch">
-                <input type="checkbox" />
-                <span class="ng-slider ng-round"></span>
-              </label>
-            </div>
-
-            <hr />
-
-            <!-- Appearance / Theme -->
-            <h5 class="mb-3">Appearance</h5>
-            <p class="text-muted small mb-2">
-              Choose how NoteGenius looks on your device.
-            </p>
-
-            <div class="row">
-              <div class="col-12 col-sm-4 mb-2">
-                <div class="form-check">
-                  <input
-                    class="form-check-input theme-radio"
-                    type="radio"
-                    name="theme"
-                    id="themeLight"
-                    value="light"
-                  />
-                  <label
-                    class="form-check-label appearance-label"
-                    for="themeLight"
-                  >
-                    Light
-                  </label>
-                </div>
-              </div>
-              <div class="col-12 col-sm-4 mb-2">
-                <div class="form-check">
-                  <input
-                    class="form-check-input theme-radio"
-                    type="radio"
-                    name="theme"
-                    id="themeDark"
-                    value="dark"
-                  />
-                  <label
-                    class="form-check-label appearance-label"
-                    for="themeDark"
-                  >
-                    Dark
-                  </label>
-                </div>
-              </div>
-              <div class="col-12 col-sm-4 mb-2">
-                <div class="form-check">
-                  <input
-                    class="form-check-input theme-radio"
-                    type="radio"
-                    name="theme"
-                    id="themeSystem"
-                    value="system"
-                  />
-                  <label
-                    class="form-check-label appearance-label"
-                    for="themeSystem"
-                  >
-                    System default
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-=======
         <!-- PRIVACY -->
         <h2 class="section-heading">Privacy</h2>
 
         <div class="switch-row">
           <span>Profile Visibility</span>
           <label class="switch">
-            <input type="checkbox" checked>
+            <input type="checkbox" checked />
             <span class="slider"></span>
           </label>
->>>>>>> eb38a38857f51a7c5d8122a152771ac97ce9c0b4
         </div>
 
         <button class="btn-setting primary">
@@ -176,7 +48,7 @@
         <div class="switch-row">
           <span>Email Notifications</span>
           <label class="switch">
-            <input type="checkbox" checked>
+            <input type="checkbox" checked />
             <span class="slider"></span>
           </label>
         </div>
@@ -184,7 +56,7 @@
         <div class="switch-row">
           <span>Push Notifications</span>
           <label class="switch">
-            <input type="checkbox">
+            <input type="checkbox" />
             <span class="slider"></span>
           </label>
         </div>
@@ -197,25 +69,21 @@
 
         <div class="appearance-options">
           <label>
-            <input type="radio" name="theme" value="light">
+            <input type="radio" name="theme" value="light" />
             Light
           </label>
           <label>
-            <input type="radio" name="theme" value="dark">
+            <input type="radio" name="theme" value="dark" />
             Dark
           </label>
           <label>
-            <input type="radio" name="theme" value="system" checked>
+            <input type="radio" name="theme" value="system" checked />
             System
           </label>
         </div>
-
       </div>
-
     </div>
-
   </div>
-
 </section>
 
 <style>
@@ -337,7 +205,7 @@
     inset: 0;
     background-color: #ccc;
     border-radius: 34px;
-    transition: .4s;
+    transition: 0.4s;
   }
 
   .slider:before {
@@ -349,7 +217,7 @@
     bottom: 3px;
     background-color: white;
     border-radius: 50%;
-    transition: .4s;
+    transition: 0.4s;
   }
 
   input:checked + .slider {
@@ -397,7 +265,8 @@
         if (save) localStorage.setItem("theme", "dark");
       } else {
         // system: follow OS preference
-        const prefersDark = window.matchMedia &&
+        const prefersDark =
+          window.matchMedia &&
           window.matchMedia("(prefers-color-scheme: dark)").matches;
 
         if (prefersDark) {
@@ -411,12 +280,14 @@
 
     // Load saved theme on page load
     const saved = localStorage.getItem("theme") || "system";
-    const savedRadio = document.querySelector(`input[name='theme'][value='${saved}']`);
+    const savedRadio = document.querySelector(
+      `input[name='theme'][value='${saved}']`
+    );
     if (savedRadio) savedRadio.checked = true;
     applyTheme(saved, false);
 
     // Listen to changes
-    radios.forEach(r => {
+    radios.forEach((r) => {
       r.addEventListener("change", () => {
         applyTheme(r.value, true);
       });

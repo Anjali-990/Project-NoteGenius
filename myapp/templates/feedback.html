@@ -1,10 +1,7 @@
-{% extends "index.html" %}
-{% load static %}
-{% block main %}
+{% extends "index.html" %} {% load static %} {% block main %}
 
 <section class="upload-section">
   <div class="feedback-wrapper">
-
     <!-- Heading -->
     <div class="text-center mb-3">
       <h1 class="feedback-title">Feedback</h1>
@@ -16,14 +13,14 @@
 
     <!-- Two-column layout -->
     <div class="feedback-grid">
-
       <!-- LEFT : MAIN FORM -->
       <div class="fb-card">
         <form id="feedbackForm">
-
           <!-- Experience rating (animated stars) -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">How was your overall experience?</label>
+            <label class="form-label fw-semibold"
+              >How was your overall experience?</label
+            >
             <div class="star-row">
               <button type="button" class="star-btn" data-value="1">
                 <i class="fas fa-star"></i>
@@ -41,7 +38,7 @@
                 <i class="fas fa-star"></i>
               </button>
             </div>
-            <input type="hidden" id="ratingInput" name="rating" value="0">
+            <input type="hidden" id="ratingInput" name="rating" value="0" />
             <p class="star-caption small text-muted mt-1">
               Tap a star to rate • 1 = poor, 5 = awesome
             </p>
@@ -92,7 +89,6 @@
               <i class="fas fa-paper-plane me-1"></i> Submit Feedback
             </button>
           </div>
-
         </form>
       </div>
 
@@ -109,13 +105,11 @@
         </ul>
 
         <div class="tip-box small">
-          💡 Tip: Be as specific as possible –
-          mention which page or feature you were using when you faced an issue.
+          💡 Tip: Be as specific as possible – mention which page or feature you
+          were using when you faced an issue.
         </div>
       </div>
-
     </div>
-
   </div>
 </section>
 
@@ -295,7 +289,7 @@
     let currentRating = 0;
 
     function applyRating(value) {
-      stars.forEach(star => {
+      stars.forEach((star) => {
         const starVal = parseInt(star.getAttribute("data-value"), 10);
         if (starVal <= value) {
           star.classList.add("active");
@@ -306,7 +300,7 @@
     }
 
     // On click – set rating + pop animation
-    stars.forEach(btn => {
+    stars.forEach((btn) => {
       btn.addEventListener("click", () => {
         const value = parseInt(btn.getAttribute("data-value"), 10);
         currentRating = value;
@@ -317,9 +311,13 @@
         btn.classList.remove("pop");
         void btn.offsetWidth; // restart animation trick
         btn.classList.add("pop");
-        btn.addEventListener("animationend", () => {
-          btn.classList.remove("pop");
-        }, { once: true });
+        btn.addEventListener(
+          "animationend",
+          () => {
+            btn.classList.remove("pop");
+          },
+          { once: true }
+        );
       });
 
       // Hover preview
