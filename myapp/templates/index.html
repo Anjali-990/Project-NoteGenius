@@ -16,6 +16,8 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+
+    <!-- Project CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
     <link rel="stylesheet" href="{% static 'css/textup.css' %}" />
     <link rel="stylesheet" href="{% static 'css/savednotes.css' %}" />
@@ -240,7 +242,7 @@
           }
         }
 
-        // Ye function settings.html se call hoga (indirectly)
+        // Ye function settings.html se call hoga
         window.setTheme = function (mode) {
           localStorage.setItem("theme", mode);
           if (mode === "system") {

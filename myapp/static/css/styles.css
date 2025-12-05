@@ -1,3 +1,6 @@
+/* ==========================
+   GLOBAL RESETS
+========================== */
 * {
   margin: 0;
   padding: 0;
@@ -8,23 +11,12 @@ body {
   font-family: Arial, sans-serif;
   min-height: 100vh;
   background-color: #f8f9fa;
+  color: #111; /* visible default text */
 }
 
-/* Headings and text in main content */
-.main-content h1,
-.main-content p {
-  color: rgb(231, 231, 231);
-  font-weight: bolder;
-}
-
-/* Card image background */
-.card-img {
-  opacity: 0.6;
-  min-height: 100vh;
-  object-fit: cover;
-}
-
-/* Desktop Sidebar */
+/* ==========================
+   DESKTOP SIDEBAR
+========================== */
 @media (min-width: 768px) {
   .desktop-sidebar {
     position: fixed;
@@ -54,7 +46,9 @@ body {
   }
 }
 
-/* Mobile Menu (Navbar) */
+/* ==========================
+   MOBILE MENU
+========================== */
 @media (max-width: 767.98px) {
   .mobile-menu .nav-link {
     color: white;
@@ -70,68 +64,74 @@ body {
   }
 }
 
-/* ================================
-   DARK MODE TEXT VISIBILITY FIXES
-   ================================ */
+/* ==========================
+   HOME HERO (optional)
+========================== */
+/* Agar home.html me hero text ko bright rakhna ho to
+   home wale container ko class="main-content home-hero"
+   dekar ye rule use kar sakti ho */
 
-/* General text */
-[data-theme="dark"] body {
-  color: #e5e7eb; /* light grey, readable on dark bg */
+.home-hero h1,
+.home-hero p {
+  color: rgb(231, 231, 231);
+  font-weight: bolder;
 }
 
-/* Headings */
-[data-theme="dark"] h1,
-[data-theme="dark"] h2,
-[data-theme="dark"] h3,
-[data-theme="dark"] h4,
-[data-theme="dark"] h5,
-[data-theme="dark"] h6 {
-  color: #f9fafb;
+/* ============================
+   UNIVERSAL DARK MODE ENGINE
+============================ */
+
+/* Body background + base text in dark */
+html[data-theme="dark"] body {
+  background: #0d1421 !important;
+  color: #e5e7eb !important;
 }
 
-/* Paragraph/text classes that usually are grey in light mode */
-[data-theme="dark"] .text-muted,
-[data-theme="dark"] .section-sub,
-[data-theme="dark"] .small,
-[data-theme="dark"] small,
-[data-theme="dark"] label,
-[data-theme="dark"] .form-label,
-[data-theme="dark"] .card-text {
-  color: #cbd5e1 !important;
+/* ALL TEXT (safe default so kuch bhi invisible na ho) */
+html[data-theme="dark"] * {
+  color: #e5e7eb !important;
 }
 
-/* Links inside content (not sidebar) */
-[data-theme="dark"] .card a,
-[data-theme="dark"] .upload-card a,
-[data-theme="dark"] .about-container a,
-[data-theme="dark"] .profile-container a,
-[data-theme="dark"] .feedback-wrapper a,
-[data-theme="dark"] .settings-wrapper a,
-[data-theme="dark"] .note-card a {
-  color: #bfdbfe;
+/* BUT: SIDEBAR ko original hi rakhna hai */
+html[data-theme="dark"] .desktop-sidebar,
+html[data-theme="dark"] .desktop-sidebar a {
+  color: white !important;
+  background-color: #2c3e50 !important;
 }
 
-[data-theme="dark"] .card a:hover,
-[data-theme="dark"] .upload-card a:hover,
-[data-theme="dark"] .about-container a:hover,
-[data-theme="dark"] .profile-container a:hover,
-[data-theme="dark"] .feedback-wrapper a:hover,
-[data-theme="dark"] .settings-wrapper a:hover,
-[data-theme="dark"] .note-card a:hover {
-  color: #93c5fd;
+html[data-theme="dark"] .desktop-sidebar a:hover {
+  background-color: #34495e !important;
 }
 
-/* Form controls text */
-[data-theme="dark"] input,
-[data-theme="dark"] select,
-[data-theme="dark"] textarea {
-  color: #e5e7eb;
+/* INPUTS */
+html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] select {
+  background: #1e293b !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
 }
 
-[data-theme="dark"] input::placeholder,
-[data-theme="dark"] textarea::placeholder {
-  color: #64748b;
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder {
+  color: #64748b !important;
 }
-[data-theme="dark"] .upload-subtitle {
-  color: #cbd5e1;
+
+/* CARDS / COMMON CONTENT BOXES */
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .settings-card,
+html[data-theme="dark"] .upload-card,
+html[data-theme="dark"] .profile-card,
+html[data-theme="dark"] .note-card,
+html[data-theme="dark"] .about-container,
+html[data-theme="dark"] .feedback-wrapper,
+html[data-theme="dark"] .settings-wrapper {
+  background: #162032 !important;
+  border-color: #253046 !important;
+}
+
+/* Ensure hero text readable on both themes */
+.home-hero h1,
+.home-hero p {
+  color: #f9fafb !important;
 }
