@@ -17,13 +17,13 @@
 }
 
 .drop-area:hover {
-  border-color: #6f42c1;
+  border-color: #2f9adf;
   background: #f3eafe;
 }
 
 .drop-area i {
   font-size: 40px;
-  color: #6f42c1;
+  color: #2f9adf;
 }
 
 /* Generate button */
