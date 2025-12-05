@@ -25,24 +25,42 @@
 
     <!-- 🌙 GLOBAL LIGHT / DARK BASE STYLES (for ALL pages, EXCEPT sidebar) -->
     <style>
-      /* Base body for light mode */
+      /* Base body for light mode (Fallbacks) */
       body {
         background: #eef2f7;
         color: #0f172a;
       }
 
-      /* Dark mode body */
+      /* ========================================================
+         *** DARK MODE FIX ENGINE (Uses data-theme="dark") ***
+         ======================================================== */
+      
+      /* 1. Universal Body and Text Colors */
       [data-theme="dark"] body {
-        background: #020617;
-        color: #e5e7eb;
+        background: #020617 !important;
+        color: #e5e7eb !important;
       }
 
-      /* Mobile navbar background in dark mode */
+      /* 2. Universal Text Override (Forces light text everywhere) */
+      [data-theme="dark"] * {
+        color: #e5e7eb !important; 
+      }
+      
+      /* 3. PROTECT THE SIDEBAR (High Specificity Reset) */
+      .desktop-sidebar,
+      .desktop-sidebar *,
+      .mobile-menu * { 
+          background-color: #2c3e50 !important; 
+          color: white !important;
+      }
+      
+      /* 4. Mobile navbar background in dark mode */
       [data-theme="dark"] .navbar.bg-dark {
         background-color: #020617 !important;
       }
 
-      /* Generic cards / sections used across pages */
+      /* 5. Generic cards / sections used across pages */
+      /* ADDED .drop-area HERE */
       [data-theme="dark"] .card,
       [data-theme="dark"] .upload-card,
       [data-theme="dark"] .about-container,
@@ -51,49 +69,71 @@
       [data-theme="dark"] .settings-wrapper,
       [data-theme="dark"] .quiz-card,
       [data-theme="dark"] .qna-card,
-      [data-theme="dark"] .note-card {
-        background-color: #020617 !important;
+      [data-theme="dark"] .note-card,
+      [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */
+        background-color: #0c1622 !important; 
         color: #e5e7eb !important;
         border-color: #1f2937 !important;
       }
+      
+      /* 7.5. IMPROVE CONTRAST FOR TEXT INSIDE CARDS/BOXES (The contrast fix) */
+      /* ADDED .drop-area HERE */
+      [data-theme="dark"] .card,
+      [data-theme="dark"] .upload-card,
+      [data-theme="dark"] .profile-container,
+      [data-theme="dark"] .note-card,
+      [data-theme="dark"] .feedback-wrapper,
+      [data-theme="dark"] .settings-wrapper,
+      [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */
+          color: #b3b3b3 !important; /* Slightly darker light grey for better contrast */
+      }
 
-      /* Inputs / textarea better contrast in dark */
+
+      /* 6. Inputs / textarea better contrast in dark */
       [data-theme="dark"] input,
       [data-theme="dark"] select,
       [data-theme="dark"] textarea {
-        background-color: #020617;
-        color: #e5e7eb;
-        border-color: #334155;
+        background-color: #0c1622 !important; 
+        color: #e5e7eb !important;
+        border-color: #334155 !important;
       }
 
       [data-theme="dark"] input::placeholder,
       [data-theme="dark"] textarea::placeholder {
-        color: #64748b;
+        color: #64748b !important;
       }
 
-      /* Links inside dark cards */
-      [data-theme="dark"] .card a,
-      [data-theme="dark"] .upload-card a,
-      [data-theme="dark"] .about-container a,
-      [data-theme="dark"] .profile-container a,
-      [data-theme="dark"] .feedback-wrapper a,
-      [data-theme="dark"] .settings-wrapper a,
-      [data-theme="dark"] .quiz-card a,
-      [data-theme="dark"] .qna-card a,
-      [data-theme="dark"] .note-card a {
-        color: #bfdbfe;
+      /* 7. Links inside dark cards */
+      [data-theme="dark"] a {
+          color: #bfdbfe !important;
+      }
+      [data-theme="dark"] a:hover {
+          color: #93c5fd !important;
       }
 
-      [data-theme="dark"] .card a:hover,
-      [data-theme="dark"] .upload-card a:hover,
-      [data-theme="dark"] .about-container a:hover,
-      [data-theme="dark"] .profile-container a:hover,
-      [data-theme="dark"] .feedback-wrapper a:hover,
-      [data-theme="dark"] .settings-wrapper a:hover,
-      [data-theme="dark"] .quiz-card a:hover,
-      [data-theme="dark"] .qna-card a:hover,
-      [data-theme="dark"] .note-card a:hover {
-        color: #93c5fd;
+      /* =================================================
+         *** PROTECTING SPECIFIC COLORS ***
+         ================================================= */
+      
+      /* 8. PROTECT BLUE HEADINGS (e.g., "Upload the...") */
+      [data-theme="dark"] h1, 
+      [data-theme="dark"] h2, 
+      [data-theme="dark"] h3 {
+          color: #007bff !important; /* Keep it blue */
+      }
+      
+      /* 9. PROTECT RED BUTTONS/TEXT (e.g., "stop") */
+      [data-theme="dark"] .text-danger,
+      [data-theme="dark"] .btn-danger,
+      [data-theme="dark"] .btn-danger * { 
+          color: red !important; /* Keep text red */
+          background-color: #dc3545 !important; /* If it's a button, keep background red */
+      }
+      
+      /* 10. PROTECT LOGO ICONS (Purple -> Blue) */
+      .fa-lightbulb,
+      .fa-lightbulb * {
+          color: #007bff !important; /* Keep it blue */
       }
     </style>
   </head>

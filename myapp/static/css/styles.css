@@ -1,137 +1,233 @@
-/* ==========================
-   GLOBAL RESETS
-========================== */
+/* styles.css - Complete CSS for Dark Mode Implementation */
+
+
+
+/* Reset basic styles for consistency */
+
 * {
+
   margin: 0;
+
   padding: 0;
+
   box-sizing: border-box;
+
 }
+
+
+
+/* Define CSS custom properties (variables) for themes */
+
+:root {
+
+  --bg-color: #ffffff; /* Light background */
+
+  --text-color: #000000; /* Dark text */
+
+  --accent-color: #007bff; /* Blue accent */
+
+  --border-color: #ddd; /* Light border */
+
+  --shadow: rgba(0, 0, 0, 0.1); /* Subtle shadow */
+
+}
+
+
+
+/* System Default Theme - Automatically follows OS preference */
+
+@media (prefers-color-scheme: dark) {
+
+  :root {
+
+    --bg-color: #121212; /* Dark background */
+
+    --text-color: #ffffff; /* Light text */
+
+    --accent-color: #bb86fc; /* Purple accent for dark */
+
+    --border-color: #333; /* Dark border */
+
+    --shadow: rgba(255, 255, 255, 0.1); /* Light shadow */
+
+  }
+
+}
+
+
+
+/* Light Mode Override - Forces light theme */
+
+.light-mode {
+
+  --bg-color: #ffffff;
+
+  --text-color: #000000;
+
+  --accent-color: #007bff;
+
+  --border-color: #ddd;
+
+  --shadow: rgba(0, 0, 0, 0.1);
+
+}
+
+
+
+/* Dark Mode Override - Forces dark theme */
+
+.dark-mode {
+
+  --bg-color: #121212;
+
+  --text-color: #ffffff;
+
+  --accent-color: #bb86fc;
+
+  --border-color: #333;
+
+  --shadow: rgba(255, 255, 255, 0.1);
+
+}
+
+
+
+/* Apply variables to global elements with smooth transitions */
 
 body {
+
+  background-color: var(--bg-color);
+
+  color: var(--text-color);
+
   font-family: Arial, sans-serif;
-  min-height: 100vh;
-  background-color: #f8f9fa;
-  color: #111; /* visible default text */
+
+  line-height: 1.6;
+
+  transition: background-color 0.3s ease, color 0.3s ease;
+
+  padding: 20px;
+
 }
 
-/* ==========================
-   DESKTOP SIDEBAR
-========================== */
-@media (min-width: 768px) {
-  .desktop-sidebar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 220px;
-    height: 100vh;
-    background-color: #2c3e50;
-    padding-top: 1rem;
-    color: white;
-  }
 
-  .desktop-sidebar a {
-    color: white;
-    text-decoration: none;
-    padding: 10px 15px;
-    display: block;
-  }
 
-  .desktop-sidebar a:hover {
-    background-color: #34495e;
-  }
+h1, h2, h3, h4, h5, h6 {
 
-  .main-content {
-    margin-left: 220px;
-    padding: 20px;
-  }
+  color: var(--text-color);
+
+  margin-bottom: 10px;
+
 }
 
-/* ==========================
-   MOBILE MENU
-========================== */
-@media (max-width: 767.98px) {
-  .mobile-menu .nav-link {
-    color: white;
-    padding: 10px 0;
-  }
 
-  .mobile-menu .nav-link:hover {
-    background-color: #34495e;
-  }
 
-  .main-content {
-    padding: 20px;
-  }
+p {
+
+  color: var(--text-color);
+
+  margin-bottom: 15px;
+
 }
 
-/* ==========================
-   HOME HERO (optional)
-========================== */
-/* Agar home.html me hero text ko bright rakhna ho to
-   home wale container ko class="main-content home-hero"
-   dekar ye rule use kar sakti ho */
 
-.home-hero h1,
-.home-hero p {
-  color: rgb(231, 231, 231);
-  font-weight: bolder;
+
+button, a {
+
+  color: var(--accent-color);
+
+  background-color: transparent;
+
+  border: 1px solid var(--border-color);
+
+  padding: 10px 15px;
+
+  text-decoration: none;
+
+  border-radius: 5px;
+
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+
+  cursor: pointer;
+
 }
 
-/* ============================
-   UNIVERSAL DARK MODE ENGINE
-============================ */
 
-/* Body background + base text in dark */
-html[data-theme="dark"] body {
-  background: #0d1421 !important;
-  color: #e5e7eb !important;
+
+button:hover, a:hover {
+
+  background-color: var(--accent-color);
+
+  color: var(--bg-color);
+
 }
 
-/* ALL TEXT (safe default so kuch bhi invisible na ho) */
-html[data-theme="dark"] * {
-  color: #e5e7eb !important;
+
+
+input, select, textarea {
+
+  background-color: var(--bg-color);
+
+  color: var(--text-color);
+
+  border: 1px solid var(--border-color);
+
+  padding: 10px;
+
+  border-radius: 5px;
+
+  transition: border-color 0.3s ease;
+
 }
 
-/* BUT: SIDEBAR ko original hi rakhna hai */
-html[data-theme="dark"] .desktop-sidebar,
-html[data-theme="dark"] .desktop-sidebar a {
-  color: white !important;
-  background-color: #2c3e50 !important;
+
+
+input:focus, select:focus, textarea:focus {
+
+  outline: none;
+
+  border-color: var(--accent-color);
+
+  box-shadow: 0 0 5px var(--shadow);
+
 }
 
-html[data-theme="dark"] .desktop-sidebar a:hover {
-  background-color: #34495e !important;
+
+
+/* Example container for theme toggle (adjust as needed) */
+
+#theme-toggle {
+
+  margin-bottom: 20px;
+
 }
 
-/* INPUTS */
-html[data-theme="dark"] input,
-html[data-theme="dark"] textarea,
-html[data-theme="dark"] select {
-  background: #1e293b !important;
-  color: #e5e7eb !important;
-  border-color: #334155 !important;
+
+
+#theme-toggle label {
+
+  margin-right: 10px;
+
+  color: var(--text-color);
+
 }
 
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: #64748b !important;
-}
 
-/* CARDS / COMMON CONTENT BOXES */
-html[data-theme="dark"] .card,
-html[data-theme="dark"] .settings-card,
-html[data-theme="dark"] .upload-card,
-html[data-theme="dark"] .profile-card,
-html[data-theme="dark"] .note-card,
-html[data-theme="dark"] .about-container,
-html[data-theme="dark"] .feedback-wrapper,
-html[data-theme="dark"] .settings-wrapper {
-  background: #162032 !important;
-  border-color: #253046 !important;
-}
 
-/* Ensure hero text readable on both themes */
-.home-hero h1,
-.home-hero p {
-  color: #f9fafb !important;
+/* Add more styles here for your app's specific elements, e.g., cards, navbars */
+
+.card {
+
+  background-color: var(--bg-color);
+
+  border: 1px solid var(--border-color);
+
+  padding: 15px;
+
+  border-radius: 8px;
+
+  box-shadow: 0 2px 4px var(--shadow);
+
+  margin-bottom: 20px;
+
 }
