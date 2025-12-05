@@ -77,7 +77,7 @@
             Dark
           </label>
           <label>
-            <input type="radio" name="theme" value="system" checked />
+            <input type="radio" name="theme" value="system" />
             System
           </label>
         </div>
@@ -251,45 +251,31 @@
 </style>
 
 <script>
-  // THEME SWITCHER LOGIC
+  // Use GLOBAL setTheme() from index.html
   document.addEventListener("DOMContentLoaded", function () {
-    const root = document.documentElement;
     const radios = document.querySelectorAll("input[name='theme']");
 
-    function applyTheme(mode, save = true) {
-      if (mode === "light") {
-        root.setAttribute("data-theme", "light");
-        if (save) localStorage.setItem("theme", "light");
-      } else if (mode === "dark") {
-        root.setAttribute("data-theme", "dark");
-        if (save) localStorage.setItem("theme", "dark");
-      } else {
-        // system: follow OS preference
-        const prefersDark =
-          window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches;
+    // saved theme from localStorage
+    const saved = localStorage.getItem("theme") || "system";
+    const savedRadio =
+      document.querySelector(`input[name='theme'][value='${saved}']`) ||
+      document.querySelector(`input[name='theme'][value='system']`);
 
-        if (prefersDark) {
-          root.setAttribute("data-theme", "dark");
-        } else {
-          root.setAttribute("data-theme", "light");
-        }
-        if (save) localStorage.setItem("theme", "system");
-      }
+    if (savedRadio) {
+      savedRadio.checked = true;
     }
 
-    // Load saved theme on page load
-    const saved = localStorage.getItem("theme") || "system";
-    const savedRadio = document.querySelector(
-      `input[name='theme'][value='${saved}']`
-    );
-    if (savedRadio) savedRadio.checked = true;
-    applyTheme(saved, false);
-
-    // Listen to changes
     radios.forEach((r) => {
       r.addEventListener("change", () => {
-        applyTheme(r.value, true);
+        const mode = r.value;
+
+        // global function (defined in index.html)
+        if (typeof window.setTheme === "function") {
+          window.setTheme(mode);
+        } else {
+          // fallback: at least save preference
+          localStorage.setItem("theme", mode);
+        }
       });
     });
   });
