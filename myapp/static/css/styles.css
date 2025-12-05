@@ -69,3 +69,69 @@ body {
     padding: 20px;
   }
 }
+
+/* ================================
+   DARK MODE TEXT VISIBILITY FIXES
+   ================================ */
+
+/* General text */
+[data-theme="dark"] body {
+  color: #e5e7eb; /* light grey, readable on dark bg */
+}
+
+/* Headings */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+  color: #f9fafb;
+}
+
+/* Paragraph/text classes that usually are grey in light mode */
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] .section-sub,
+[data-theme="dark"] .small,
+[data-theme="dark"] small,
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label,
+[data-theme="dark"] .card-text {
+  color: #cbd5e1 !important;
+}
+
+/* Links inside content (not sidebar) */
+[data-theme="dark"] .card a,
+[data-theme="dark"] .upload-card a,
+[data-theme="dark"] .about-container a,
+[data-theme="dark"] .profile-container a,
+[data-theme="dark"] .feedback-wrapper a,
+[data-theme="dark"] .settings-wrapper a,
+[data-theme="dark"] .note-card a {
+  color: #bfdbfe;
+}
+
+[data-theme="dark"] .card a:hover,
+[data-theme="dark"] .upload-card a:hover,
+[data-theme="dark"] .about-container a:hover,
+[data-theme="dark"] .profile-container a:hover,
+[data-theme="dark"] .feedback-wrapper a:hover,
+[data-theme="dark"] .settings-wrapper a:hover,
+[data-theme="dark"] .note-card a:hover {
+  color: #93c5fd;
+}
+
+/* Form controls text */
+[data-theme="dark"] input,
+[data-theme="dark"] select,
+[data-theme="dark"] textarea {
+  color: #e5e7eb;
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+  color: #64748b;
+}
+[data-theme="dark"] .upload-subtitle {
+  color: #cbd5e1;
+}
