@@ -201,19 +201,20 @@
     position: relative;
   }
 
+  /* 🟡 icon colours – !important taaki global dark CSS overwrite na kare */
   .star-btn i {
     font-size: 20px;
-    color: #d1d5db; /* default grey */
+    color: #d1d5db !important; /* default grey */
     transition: color 0.15s ease, transform 0.15s ease;
   }
 
   .star-btn:hover i {
-    color: #fde047; /* bright yellow on hover */
+    color: #fde047 !important; /* bright yellow on hover */
     transform: translateY(-1px) scale(1.05);
   }
 
   .star-btn.active i {
-    color: #facc15; /* filled yellow */
+    color: #facc15 !important; /* filled yellow */
     filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.9));
   }
 
@@ -234,12 +235,13 @@
     }
   }
 
+  /* Dark-mode specific tweaks (still with !important) */
   [data-theme="dark"] .star-btn i {
-    color: #4b5563;
+    color: #4b5563 !important;
   }
 
   [data-theme="dark"] .star-btn.active i {
-    color: #facc15;
+    color: #facc15 !important;
   }
 
   .star-caption {
