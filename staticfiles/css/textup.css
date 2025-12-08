@@ -1,0 +1,93 @@
+/* ----------- Layout Fixes ----------- */
+.sidebar {
+  background-color: #1f3349;
+  min-height: 100vh;
+}
+
+.main-content {
+  overflow-x: hidden;
+}
+
+/* ----------- Upload Section ----------- */
+.upload-section {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+
+.upload-card {
+  background: #ffffff;
+  padding: 25px 30px;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Drop Zone */
+.drop-area {
+  border: 2px dashed #58a6ff;
+  padding: 35px 20px;
+  border-radius: 12px;
+  background: #f3f9ff;
+  text-align: center;
+  transition: 0.3s ease;
+}
+
+.drop-area:hover {
+  background: #e8f3ff;
+  border-color: #2b8cff;
+}
+
+.upload-icon {
+  font-size: 46px;
+  color: #2b8cff;
+}
+
+/* Generate Button */
+.generate-btn {
+  background-color: #1f3349;
+  color: white;
+  padding: 12px;
+  border: none;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  transition: 0.25s;
+}
+
+.generate-btn:hover {
+  background-color: #2a4b6b;
+}
+
+/* ---------- Responsive Fixes ---------- */
+@media (max-width: 992px) {
+  .sidebar {
+    min-height: auto;
+  }
+}
+
+@media (max-width: 768px) {
+  .upload-section {
+    padding: 10px;
+  }
+
+  .upload-card {
+    padding: 18px;
+  }
+
+  .drop-area {
+    padding: 25px 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  h3 {
+    font-size: 1.3rem;
+  }
+
+  .upload-icon {
+    font-size: 34px;
+  }
+
+  .drop-area {
+    padding: 20px 12px;
+  }
+}
