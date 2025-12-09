@@ -23,7 +23,14 @@ urlpatterns = [
     path('', views.home, name='home'),     # home page
     path("login/", views.login_view, name="login"),
     path("signup/", views.signup_view, name="signup"),
-    path('textup/', views.textup, name='textup'), # text upload
+
+    #textup---------------------------------------
+    path('textup/', views.textup, name='textup'),
+    path('download/pdf/', views.download_pdf, name='download_pdf'),
+    path('download/docx/', views.download_docx, name='download_docx'),
+    path('save-notes/', views.save_notes, name='save_notes'),
+    #----------------------------------------------
+
     path('savednotes/', views.savednotes, name='savednotes'), # saved notes
     path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
     path("video-upload/", views.video_upload, name="video_upload"), #video upload
