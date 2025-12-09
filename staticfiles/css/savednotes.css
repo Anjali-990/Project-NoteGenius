@@ -1,0 +1,40 @@
+/* Parent card styling */
+.saved-card {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Saved Note Cards */
+.saved-note-card {
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 18px;
+  border: 1px solid #e4e7ec;
+  transition: 0.2s ease;
+  height: 100%;
+}
+
+.saved-note-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.saved-note-card .note-title {
+  font-weight: 600;
+}
+
+.saved-note-card .note-preview {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+/* Toggle buttons */
+.toggle-btn.active {
+  background-color: #3a86ff;
+  color: #fff !important;
+}
+
+/* Table Styling */
+.table-hover tbody tr:hover {
+  background-color: #f8f9fc;
+}
