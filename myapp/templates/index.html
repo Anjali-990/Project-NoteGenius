@@ -141,8 +141,82 @@
       .fa-lightbulb * {
           color: #007bff !important; /* Keep it blue */
       }
+      /* paste into your main stylesheet (e.g., styles.css) or inside <style> in base/index */
+[data-theme="dark"] body,
+[data-theme="dark"] .card,
+[data-theme="dark"] .upload-card,
+[data-theme="dark"] .about-container,
+[data-theme="dark"] .profile-container,
+[data-theme="dark"] .feedback-wrapper,
+[data-theme="dark"] .settings-wrapper,
+[data-theme="dark"] .quiz-card,
+[data-theme="dark"] .qna-card,
+[data-theme="dark"] .note-card,
+[data-theme="dark"] .drop-area,
+[data-theme="dark"] .main-content,
+[data-theme="dark"] .upload-section {
+  color: #e5e7eb !important;
+}
+
+/* Fix white/light blocks used for generated output and upload card */
+[data-theme="dark"] .bg-light,
+[data-theme="dark"] .bg-white,
+[data-theme="dark"] .mt-4.p-3.bg-light,
+[data-theme="dark"] .upload-card {
+  background-color: #0f172a !important;
+  color: #e5e7eb !important;
+  border-color: #1e293b !important;
+}
+
+/* textarea placeholder in dark */
+[data-theme="dark"] textarea::placeholder {
+  color: #93a2b8 !important;
+}
+/* AUDIO PAGE DARK MODE FIX */
+[data-theme="dark"] #audioResultSection,
+[data-theme="dark"] .result-section {
+    background-color: #0f172a !important;
+    color: #e5e7eb !important;
+    border: 1px solid #1e293b !important;
+}
+
+/* Microphone icon + headings visible in dark */
+[data-theme="dark"] .drop-area i,
+[data-theme="dark"] .upload-card h3,
+[data-theme="dark"] .upload-card h5 {
+    color: #3b82f6 !important;
+}
+
+/* Force buttons visible in dark */
+[data-theme="dark"] .btn {
+    color: #e5e7eb !important;
+}
+
+/* Text inside audio notes */
+[data-theme="dark"] #audioResultSection p,
+[data-theme="dark"] #audioResultSection li {
+    color: #e5e7eb !important;
+}
+
     </style>
   </head>
+
+  <!-- Paste this JS before </body> in your base/index (or index.html) -->
+<script>
+  (function () {
+    const uploadForm = document.getElementById("uploadForm");
+    if (!uploadForm) return;
+    uploadForm.addEventListener("submit", function (e) {
+      const btn = this.querySelector('button[type="submit"]');
+      if (btn) {
+        btn.disabled = true;
+        btn.dataset.orig = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating...';
+      }
+    });
+  })();
+</script>
+
 
   <body>
     <!-- Mobile Navbar -->
