@@ -1,0 +1,8 @@
+transformers
+torch
+sentencepiece
+SpeechRecognition
+PyPDF2
+python-docx
+reportlab
+pydub

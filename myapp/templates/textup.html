@@ -1,51 +1,135 @@
-{% extends "index.html" %}
-{% block main %}
+{% extends "index.html" %} {% block main %}
 
 <div class="container upload-section">
   <div class="upload-card">
-
     <h3 class="mb-2">Upload Text to Generate Notes</h3>
     <p class="text-muted">
       Paste your content or upload a text file. Our AI assistant will summarize
       and create structured notes for you.
     </p>
 
-    <form id="uploadForm">
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="">
+      {% csrf_token %}
 
       <!-- DROP AREA -->
       <div class="drop-area mt-3">
         <i class="fas fa-cloud-arrow-up upload-icon"></i>
         <h6 class="mt-2">Drag & Drop your text file here</h6>
         <p class="text-muted small">or click below to choose a file</p>
-
-        <!-- ✔ ONLY TEXT FILES ALLOWED -->
-        <input 
-          type="file" 
-          class="form-control mt-2" 
+        <input
+          type="file"
+          class="form-control mt-2"
           id="fileInput"
-          accept=".txt, .pdf, .doc, .docx"
-        >
+          name="file"
+        />
       </div>
 
       <!-- TEXT AREA -->
       <div class="my-3">
-        <label class="form-label fw-semibold text-secondary">
-          Or paste your text below:
-        </label>
+        <label class="form-label fw-semibold text-secondary"
+          >Or paste your text below:</label
+        >
         <textarea
           class="form-control"
           rows="6"
+          name="content"
           placeholder="Paste your content here..."
         ></textarea>
       </div>
 
+      <!-- SUMMARY LENGTH -->
+      <div class="my-3">
+        <label class="form-label fw-semibold text-secondary"
+          >Select Notes Length:</label
+        >
+        <select class="form-control" name="summary_length">
+          <option value="short">Short (Quick Notes)</option>
+          <option value="medium" selected>Medium (Balanced)</option>
+          <option value="long">Long (Detailed)</option>
+        </select>
+      </div>
+
       <!-- BUTTON -->
-      <button class="generate-btn w-100">
+      <button class="generate-btn w-100" type="submit">
         <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes
       </button>
-
     </form>
 
+    <!-- SHOW WARNING -->
+    {% if warning %}
+    <div class="mt-3 p-3 bg-warning text-dark rounded">
+      <p>{{ warning }}</p>
+    </div>
+    {% endif %}
+
+    <!-- SHOW ERROR -->
+    {% if error %}
+    <div class="mt-3 p-3 bg-danger text-white rounded">
+      <p>{{ error }}</p>
+    </div>
+    {% endif %}
+
+    <!-- SHOW STRUCTURED SUMMARY -->
+    {% if summary %}
+    <div class="mt-4 p-3 bg-light rounded">
+      <h5 class="mb-3">Your Generated Notes</h5>
+
+      <!-- Short Summary -->
+      <div class="mb-3">
+        <h6>⭐ Short Summary</h6>
+        <p>{{ summary.short_summary }}</p>
+      </div>
+
+      <!-- Bullet Points -->
+      <div class="mb-3">
+        <h6>⭐ Bullet Points</h6>
+        <ul>
+          {% for b in summary.bullets %}
+          <li>{{ b }}</li>
+          {% empty %}
+          <li>No bullet points generated.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Detailed Explanation -->
+      <div class="mb-3">
+        <h6>⭐ Detailed Explanation</h6>
+        <p>{{ summary.detailed_explanation }}</p>
+      </div>
+
+      <!-- Key Terms -->
+      <div class="mb-3">
+        <h6>⭐ Key Terms</h6>
+        <ul>
+          {% for t in summary.key_terms %}
+          <li>{{ t }}</li>
+          {% empty %}
+          <li>No key terms generated.</li>
+          {% endfor %}
+        </ul>
+      </div>
+
+      <!-- Export Buttons -->
+      <div class="d-flex gap-2 mt-3">
+        <a href="{% url 'download_pdf' %}" class="btn btn-primary w-50">
+          <i class="fas fa-file-pdf me-1"></i> Export as PDF
+        </a>
+        <a
+          href="{% url 'download_docx' %}"
+          class="btn btn-outline-primary w-50"
+        >
+          <i class="fas fa-file-word me-1"></i> Export as Word
+        </a>
+      </div>
+      <!-- SAVE TO WEBSITE BUTTON -->
+      <form action="{% url 'save_notes' %}" method="POST" class="mt-3">
+        {% csrf_token %}
+        <input type="hidden" name="notes_data" value="{{ summary|escape }}" />
+        <button class="btn btn-success w-100">💾 Save Notes in Website</button>
+      </form>
+    </div>
+    {% endif %}
   </div>
 </div>
 
