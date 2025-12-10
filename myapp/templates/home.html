@@ -2,48 +2,47 @@
 {% load static %}
 {% block main %}
 
-<div class="main-content card bg-dark">
+<!-- Hero: clean background (no shadow / no rounded corners) -->
+<div class="home-hero">
+  <!-- Keep the same image you used before -->
   <img
     src="{% static 'images/img1.jpg' %}"
-    class="card-img"
     alt="AI workspace background"
+    class="hero-bg"
   />
-  <div
-    class="card-img-overlay position-absolute top-50 start-50 translate-middle text-center text-white"
-  >
-    <h1 class="unique-dashboard-title" style="font-size: 2.7rem;">WELCOME TO NOTEGENIUS</h1>
-    <p class="card-text mb-4">
+
+  <!-- overlay content centered -->
+  <div class="hero-overlay">
+    <h1 class="unique-dashboard-title" style="font-size: 2.7rem; color: #fff;">
+      WELCOME TO NOTEGENIUS
+    </h1>
+    <p class="card-text mb-3" style="color: rgba(255,255,255,0.95); max-width: 900px;">
       This is your AI-powered workspace to generate notes, Q&A, and quizzes from
       text, audio, or video.
     </p>
 
     {% if not user.is_authenticated %}
-    <!-- Login & Sign up buttons for guests -->
-    <div class="d-flex gap-3 justify-content-center">
-      <button
-        type="button"
-        class="btn btn-outline-light"
-        onclick="window.location.href='{% url 'login' %}'"
-      >
-        Login
-      </button>
-
-      <button
-        type="button"
-        class="btn btn-primary"
-        onclick="window.location.href='{% url 'signup' %}'"
-      >
-        Sign up
-      </button>
+    <div class="cta-row">
+      <button type="button" class="btn btn-outline-light me-2" onclick="window.location.href='{% url 'login' %}'">Login</button>
+      <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'signup' %}'">Sign up</button>
     </div>
     {% else %}
-    <!-- CTAs for logged-in users -->
-    <div class="d-flex gap-3 justify-content-center">
-      <a class="btn btn-outline-light" href="{% url 'profile' %}">Go to Profile</a>
-      <a class="btn btn-success" href="{% url 'textup' %}">Create Notes</a>
+    <div class="cta-row">
+      <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">View Profile</a>
+      <a class="btn btn-success me-2" href="{% url 'textup' %}">Create Notes</a>
+      <a class="btn btn-danger" href="{% url 'logout' %}">Logout</a>
+    </div>
+
+    <div class="hero-welcome">
+      <p style="margin-bottom:0; font-weight:600; color: rgba(255,255,255,0.98);">
+        👋 Welcome, {{ user.first_name|default:user.username }}
+      </p>
+      <div style="color: rgba(255,255,255,0.85); font-size:0.95rem;">
+        {{ user.email|default:'' }}
+      </div>
     </div>
     {% endif %}
-
   </div>
 </div>
+
 {% endblock %}

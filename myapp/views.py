@@ -2,6 +2,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
 from django.http import JsonResponse, FileResponse, Http404
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
@@ -72,7 +73,7 @@ LENGTH_PRESETS = {
 }
 
 # ---------------------------
-# AUTH + ACCOUNT VIEWS (unchanged)
+# AUTH + ACCOUNT VIEWS (edited signup to NOT auto-login)
 # ---------------------------
 def home(request):
     return render(request, "home.html")
@@ -115,6 +116,12 @@ def login_view(request):
 
 
 def signup_view(request):
+    """
+    Signup behaviour changed:
+      - create user on POST (after checks)
+      - DO NOT auto-login the user
+      - show a success message and redirect to login page
+    """
     if request.method == "POST":
         username = request.POST.get("username")
         email = request.POST.get("email")
@@ -132,8 +139,11 @@ def signup_view(request):
         user = User.objects.create_user(username=username, email=email, password=password1)
         if phone:
             Profile.objects.create(user=user, phone=phone)
-        login(request, user)
-        return redirect("home")
+
+        # Don't auto-login. Ask user to login explicitly.
+        messages.success(request, "Account created successfully. Please log in to continue.")
+        return redirect("login")
+
     return render(request, "signup.html")
 
 

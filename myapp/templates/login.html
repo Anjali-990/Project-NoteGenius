@@ -9,13 +9,23 @@
       Use your email / mobile and password, or login with OTP.
     </p>
 
+    {# --- Django messages (signup success, other notices) --- #}
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %} alert-dismissible fade show" role="alert" style="border-radius:10px;">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
     {% if error %}
     <div class="alert alert-danger">
       {{ error }}
     </div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" id="loginForm">
       {% csrf_token %}
 
       <div class="mb-3 text-start">
@@ -118,6 +128,7 @@
   const loginOtpInput = document.getElementById("loginOtpInput");
   const loginOtpStatus = document.getElementById("loginOtpStatus");
   const loginIdInput = document.getElementById("loginId");
+  const loginForm = document.getElementById("loginForm");
 
   function getCsrfToken() {
     const name = "csrftoken";
@@ -130,6 +141,24 @@
     }
     return "";
   }
+
+  // Prefill login field if ?email=... is present (useful after signup redirect)
+  (function prefillFromQuery() {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const pre = params.get("email") || params.get("login_id") || params.get("username");
+      if (pre) {
+        loginIdInput.value = pre;
+        loginIdInput.focus();
+      } else {
+        // if there are messages (signup success), focus loginId for quick action
+        const hasAlert = document.querySelector(".alert");
+        if (hasAlert) loginIdInput.focus();
+      }
+    } catch (e) {
+      // ignore
+    }
+  })();
 
   if (loginSendOtpBtn) {
     loginSendOtpBtn.addEventListener("click", function () {
