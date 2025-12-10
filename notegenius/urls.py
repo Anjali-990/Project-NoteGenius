@@ -1,41 +1,27 @@
-"""
-URL configuration for notegenius project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.2/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from myapp import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
     path('', views.home, name='home'),     # home page
     path("login/", views.login_view, name="login"),
     path("signup/", views.signup_view, name="signup"),
-    path('textup/', views.textup, name='textup'), # text upload
-    path('savednotes/', views.savednotes, name='savednotes'), # saved notes
-    path("audio-upload/", views.audio_upload, name="audio_upload"), #audio upload
-    path("video-upload/", views.video_upload, name="video_upload"), #video upload
-    path("qna-upload/", views.qna_upload, name="qna_upload"), #QnA generator upload
-    path("quiz-upload/", views.quiz_upload, name="quiz_upload"), #Quiz generator upload
+    path("logout/", views.logout_view, name="logout"),
+
+    path('textup/', views.textup, name='textup'),
+    path('savednotes/', views.savednotes, name='savednotes'),
+    path("audio-upload/", views.audio_upload, name="audio_upload"),
+    path("video-upload/", views.video_upload, name="video_upload"),
+    path("qna-upload/", views.qna_upload, name="qna_upload"),
+    path("quiz-upload/", views.quiz_upload, name="quiz_upload"),
     path("profile/", views.profile, name="profile"),
     path("settings/", views.settings_page, name="settings"),
-    
+
     path("about/", views.about, name="about"),
     path("feedback/", views.feedback, name="feedback"),
+
+    # NEW: OTP send karne ke liye email par
+    path("send-login-otp/", views.send_login_otp, name="send_login_otp"),
 ]
-
-
-
-
