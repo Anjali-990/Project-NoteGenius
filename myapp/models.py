@@ -23,3 +23,15 @@ class EmailOTP(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.code}"
+from django.db import models
+from django.conf import settings
+
+class Notes(models.Model):
+    # optional relation to user
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    title = models.CharField(max_length=255, blank=True)
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return (self.title or self.content[:60]) 

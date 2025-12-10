@@ -278,3 +278,90 @@ h3 {
 [data-theme="dark"] .chip i {
   color: #93c5fd !important;  /* soft blue icon */
 }
+/* ======= DARK MODE DISPLAY FIXES (paste near end of styles.css) ======= */
+
+/* Ensure main result/cards have readable dark background & text */
+html[data-theme="dark"] .upload-card,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .note-card,
+html[data-theme="dark"] .about-container,
+html[data-theme="dark"] .profile-container,
+html[data-theme="dark"] .feedback-wrapper,
+html[data-theme="dark"] .settings-wrapper,
+html[data-theme="dark"] .quiz-card,
+html[data-theme="dark"] .qna-card,
+html[data-theme="dark"] .drop-area,
+html[data-theme="dark"] .result-section,
+html[data-theme="dark"] .upload-section {
+  background-color: #07101a !important; /* deep navy */
+  color: #e6eef8 !important;            /* light text */
+  border: 1px solid #15232b !important;
+}
+
+/* Force paragraphs, headings and list text to be visible */
+html[data-theme="dark"] .upload-card p,
+html[data-theme="dark"] .upload-card h3,
+html[data-theme="dark"] .upload-card h5,
+html[data-theme="dark"] .result-section p,
+html[data-theme="dark"] .result-section li,
+html[data-theme="dark"] .result-section h6,
+html[data-theme="dark"] .drop-area h6,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .form-label,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select {
+  color: #e6eef8 !important;
+}
+
+/* Fix for any elements using bg-light (override Bootstrap classes) */
+html[data-theme="dark"] .bg-light {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Make links readable */
+html[data-theme="dark"] a, html[data-theme="dark"] a:link {
+  color: #93c5fd !important;
+}
+
+/* Buttons - ensure contrast */
+html[data-theme="dark"] .btn,
+html[data-theme="dark"] .generate-btn {
+  color: #f8fafc !important;
+}
+
+/* Audio transcript / summary boxes */
+html[data-theme="dark"] #transcriptBox,
+html[data-theme="dark"] #summaryBox,
+html[data-theme="dark"] #audioResultSection,
+html[data-theme="dark"] #shortSummary,
+html[data-theme="dark"] #detailedExplanation {
+  background: #06121a !important;
+  color: #e6eef8 !important;
+  padding: 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid #13303b !important;
+}
+
+/* Make <textarea> placeholders readable */
+html[data-theme="dark"] textarea::placeholder,
+html[data-theme="dark"] input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Force icons color */
+html[data-theme="dark"] .fas,
+html[data-theme="dark"] .fa-lightbulb {
+  color: #60a5fa !important;
+}
+
+/* Small detail: make any .text-muted more visible */
+html[data-theme="dark"] .text-muted { color: #94a3b8 !important; }
+
+/* Important: highest specificity for problem elements */
+html[data-theme="dark"] .upload-card.bg-light,
+html[data-theme="dark"] .result-section.bg-light {
+  background-color: #07101a !important;
+  color: #e6eef8 !important;
+}

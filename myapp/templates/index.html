@@ -25,11 +25,211 @@
 
     <!-- 🌙 GLOBAL LIGHT / DARK BASE STYLES (for ALL pages, EXCEPT sidebar) -->
     <style>
-      /* Paste your original style block here exactly as it was.
-         (I left it out to keep this snippet short; keep your large style block.) */
-      /* -- BEGIN ORIGINAL STYLES -- */
-      /* (paste the whole CSS block from your earlier index.html) */
-      /* -- END ORIGINAL STYLES -- */
+      body {
+        background: #eef2f7;
+        color: #0f172a;
+      }
+
+      /* ========================================================
+         *** DARK MODE FIX ENGINE (Uses data-theme="dark") ***
+         ======================================================== */
+      
+      /* 1. Universal Body and Text Colors */
+      [data-theme="dark"] body {
+        background: #020617 !important;
+        color: #e5e7eb !important;
+      }
+
+      /* 2. Universal Text Override (Forces light text everywhere) */
+      [data-theme="dark"] * {
+        color: #e5e7eb !important; 
+      }
+      
+      /* 3. PROTECT THE SIDEBAR (High Specificity Reset) */
+      .desktop-sidebar,
+      .desktop-sidebar *,
+      .mobile-menu * { 
+          background-color: #2c3e50 !important; 
+          color: white !important;
+      }
+      
+      /* 4. Mobile navbar background in dark mode */
+      [data-theme="dark"] .navbar.bg-dark {
+        background-color: #020617 !important;
+      }
+
+      /* 5. Generic cards / sections used across pages */
+      /* ADDED .drop-area HERE */
+      [data-theme="dark"] .card,
+      [data-theme="dark"] .upload-card,
+      [data-theme="dark"] .about-container,
+      [data-theme="dark"] .profile-container,
+      [data-theme="dark"] .feedback-wrapper,
+      [data-theme="dark"] .settings-wrapper,
+      [data-theme="dark"] .quiz-card,
+      [data-theme="dark"] .qna-card,
+      [data-theme="dark"] .note-card,
+      [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */
+        background-color: #0c1622 !important; 
+        color: #e5e7eb !important;
+        border-color: #1f2937 !important;
+      }
+      
+      /* 7.5. IMPROVE CONTRAST FOR TEXT INSIDE CARDS/BOXES (The contrast fix) */
+      /* ADDED .drop-area HERE */
+      [data-theme="dark"] .card,
+      [data-theme="dark"] .upload-card,
+      [data-theme="dark"] .profile-container,
+      [data-theme="dark"] .note-card,
+      [data-theme="dark"] .feedback-wrapper,
+      [data-theme="dark"] .settings-wrapper,
+      [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */
+          color: #b3b3b3 !important; /* Slightly darker light grey for better contrast */
+      }
+
+
+      /* 6. Inputs / textarea better contrast in dark */
+      [data-theme="dark"] input,
+      [data-theme="dark"] select,
+      [data-theme="dark"] textarea {
+        background-color: #0c1622 !important; 
+        color: #e5e7eb !important;
+        border-color: #334155 !important;
+      }
+
+      [data-theme="dark"] input::placeholder,
+      [data-theme="dark"] textarea::placeholder {
+        color: #64748b !important;
+      }
+
+      /* 7. Links inside dark cards */
+      [data-theme="dark"] a {
+          color: #bfdbfe !important;
+      }
+      [data-theme="dark"] a:hover {
+          color: #93c5fd !important;
+      }
+
+      /* =================================================
+         *** PROTECTING SPECIFIC COLORS ***
+         ================================================= */
+      
+      /* 8. PROTECT BLUE HEADINGS (e.g., "Upload the...") */
+      [data-theme="dark"] h1, 
+      [data-theme="dark"] h2, 
+      [data-theme="dark"] h3 {
+          color: #007bff !important; /* Keep it blue */
+      }
+      
+      /* 8.5. OVERRIDE: Dashboard Heading color set to White using unique class */
+      [data-theme="dark"] .unique-dashboard-title {
+      /* Set color to White for Dark Mode */
+      color: #e5e7eb !important; 
+      }
+
+      /* 9. PROTECT RED BUTTONS/TEXT (e.g., "stop") */
+      [data-theme="dark"] .text-danger,
+      [data-theme="dark"] .btn-danger,
+      [data-theme="dark"] .btn-danger * { 
+          color: red !important; /* Keep text red */
+          background-color: #dc3545 !important; /* If it's a button, keep background red */
+      }
+      
+      /* 10. PROTECT LOGO ICONS (Purple -> Blue) */
+      .fa-lightbulb,
+      .fa-lightbulb * {
+          color: #007bff !important; /* Keep it blue */
+      }
+
+      /* Base body for light mode (Fallbacks) */ body { background: #eef2f7; color: #0f172a; } /* ======================================================== *** DARK MODE FIX ENGINE (Uses data-theme="dark") *** ======================================================== */ /* 1. Universal Body and Text Colors */ [data-theme="dark"] body { background: #020617 !important; color: #e5e7eb !important; } /* 2. Universal Text Override (Forces light text everywhere) */ [data-theme="dark"] * { color: #e5e7eb !important; } /* 3. PROTECT THE SIDEBAR (High Specificity Reset) */ .desktop-sidebar, .desktop-sidebar *, .mobile-menu * { background-color: #2c3e50 !important; color: white !important; } /* 4. Mobile navbar background in dark mode */ [data-theme="dark"] .navbar.bg-dark { background-color: #020617 !important; } /* 5. Generic cards / sections used across pages */ /* ADDED .drop-area HERE */ [data-theme="dark"] .card, [data-theme="dark"] .upload-card, [data-theme="dark"] .about-container, [data-theme="dark"] .profile-container, [data-theme="dark"] .feedback-wrapper, [data-theme="dark"] .settings-wrapper, [data-theme="dark"] .quiz-card, [data-theme="dark"] .qna-card, [data-theme="dark"] .note-card, [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */ background-color: #0c1622 !important; color: #e5e7eb !important; border-color: #1f2937 !important; } /* 7.5. IMPROVE CONTRAST FOR TEXT INSIDE CARDS/BOXES (The contrast fix) */ /* ADDED .drop-area HERE */ [data-theme="dark"] .card, [data-theme="dark"] .upload-card, [data-theme="dark"] .profile-container, [data-theme="dark"] .note-card, [data-theme="dark"] .feedback-wrapper, [data-theme="dark"] .settings-wrapper, [data-theme="dark"] .drop-area { /* <-- ADDED .drop-area */ color: #b3b3b3 !important; /* Slightly darker light grey for better contrast */ } /* 6. Inputs / textarea better contrast in dark */ [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea { background-color: #0c1622 !important; color: #e5e7eb !important; border-color: #334155 !important; } [data-theme="dark"] input::placeholder, [data-theme="dark"] textarea::placeholder { color: #64748b !important; } /* 7. Links inside dark cards */ [data-theme="dark"] a { color: #bfdbfe !important; } [data-theme="dark"] a:hover { color: #93c5fd !important; } /* ================================================= *** PROTECTING SPECIFIC COLORS *** ================================================= */ /* 8. PROTECT BLUE HEADINGS (e.g., "Upload the...") */ [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3 { color: #007bff !important; /* Keep it blue */ } /* 8.5. OVERRIDE: Dashboard Heading color set to White using unique class */ [data-theme="dark"] .unique-dashboard-title { /* Set color to White for Dark Mode */ color: #e5e7eb !important; } /* 9. PROTECT RED BUTTONS/TEXT (e.g., "stop") */ [data-theme="dark"] .text-danger, [data-theme="dark"] .btn-danger, [data-theme="dark"] .btn-danger * { color: red !important; /* Keep text red */ background-color: #dc3545 !important; /* If it's a button, keep background red */ } /* 10. PROTECT LOGO ICONS (Purple -> Blue) */ .fa-lightbulb, .fa-lightbulb * { color: #007bff !important; /* Keep it blue */ }      
+      /* ======= DARK MODE DISPLAY FIXES (paste near end of styles.css) ======= */
+
+/* Ensure main result/cards have readable dark background & text */
+html[data-theme="dark"] .upload-card,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .note-card,
+html[data-theme="dark"] .about-container,
+html[data-theme="dark"] .profile-container,
+html[data-theme="dark"] .feedback-wrapper,
+html[data-theme="dark"] .settings-wrapper,
+html[data-theme="dark"] .quiz-card,
+html[data-theme="dark"] .qna-card,
+html[data-theme="dark"] .drop-area,
+html[data-theme="dark"] .result-section,
+html[data-theme="dark"] .upload-section {
+  background-color: #07101a !important; /* deep navy */
+  color: #e6eef8 !important;            /* light text */
+  border: 1px solid #15232b !important;
+}
+
+/* Force paragraphs, headings and list text to be visible */
+html[data-theme="dark"] .upload-card p,
+html[data-theme="dark"] .upload-card h3,
+html[data-theme="dark"] .upload-card h5,
+html[data-theme="dark"] .result-section p,
+html[data-theme="dark"] .result-section li,
+html[data-theme="dark"] .result-section h6,
+html[data-theme="dark"] .drop-area h6,
+html[data-theme="dark"] label,
+html[data-theme="dark"] .form-label,
+html[data-theme="dark"] textarea,
+html[data-theme="dark"] input,
+html[data-theme="dark"] select {
+  color: #e6eef8 !important;
+}
+
+/* Fix for any elements using bg-light (override Bootstrap classes) */
+html[data-theme="dark"] .bg-light {
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+/* Make links readable */
+html[data-theme="dark"] a, html[data-theme="dark"] a:link {
+  color: #93c5fd !important;
+}
+
+/* Buttons - ensure contrast */
+html[data-theme="dark"] .btn,
+html[data-theme="dark"] .generate-btn {
+  color: #f8fafc !important;
+}
+
+/* Audio transcript / summary boxes */
+html[data-theme="dark"] #transcriptBox,
+html[data-theme="dark"] #summaryBox,
+html[data-theme="dark"] #audioResultSection,
+html[data-theme="dark"] #shortSummary,
+html[data-theme="dark"] #detailedExplanation {
+  background: #06121a !important;
+  color: #e6eef8 !important;
+  padding: 10px !important;
+  border-radius: 6px !important;
+  border: 1px solid #13303b !important;
+}
+
+/* Make <textarea> placeholders readable */
+html[data-theme="dark"] textarea::placeholder,
+html[data-theme="dark"] input::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Force icons color */
+html[data-theme="dark"] .fas,
+html[data-theme="dark"] .fa-lightbulb {
+  color: #60a5fa !important;
+}
+
+/* Small detail: make any .text-muted more visible */
+html[data-theme="dark"] .text-muted { color: #94a3b8 !important; }
+
+/* Important: highest specificity for problem elements */
+html[data-theme="dark"] .upload-card.bg-light,
+html[data-theme="dark"] .result-section.bg-light {
+  background-color: #07101a !important;
+  color: #e6eef8 !important;
+}
+
     </style>
   </head>
 
