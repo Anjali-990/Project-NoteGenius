@@ -100,9 +100,10 @@
         />
       </div>
 
-      <button type="button" class="btn btn-outline-secondary w-100 mt-2">
+      <button type="submit" class="btn btn-outline-secondary w-100 mt-2">
         Login with OTP
       </button>
+
     </form>
 
     <p class="mt-3 text-center">
@@ -113,19 +114,60 @@
 </section>
 
 <script>
-  // FRONTEND ONLY – fake OTP flow for login
   const loginSendOtpBtn = document.getElementById("loginSendOtp");
   const loginOtpInput = document.getElementById("loginOtpInput");
   const loginOtpStatus = document.getElementById("loginOtpStatus");
+  const loginIdInput = document.getElementById("loginId");
+
+  function getCsrfToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie.split(";");
+    for (let c of cookies) {
+      c = c.trim();
+      if (c.startsWith(name + "=")) {
+        return c.substring(name.length + 1);
+      }
+    }
+    return "";
+  }
 
   if (loginSendOtpBtn) {
     loginSendOtpBtn.addEventListener("click", function () {
-      loginOtpInput.disabled = false;
-      loginOtpInput.focus();
-      loginOtpStatus.textContent =
-        "Dummy: OTP sent! (Frontend only, backend baad me connect hoga)";
-      loginOtpStatus.classList.remove("text-muted");
-      loginOtpStatus.classList.add("text-success");
+      const loginId = loginIdInput.value.trim();
+      if (!loginId) {
+        loginOtpStatus.textContent = "Please enter your email first.";
+        loginOtpStatus.classList.remove("text-muted", "text-success");
+        loginOtpStatus.classList.add("text-danger");
+        return;
+      }
+
+      fetch("{% url 'send_login_otp' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCsrfToken(),
+        },
+        body: new URLSearchParams({ login_id: loginId }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            loginOtpInput.disabled = false;
+            loginOtpInput.focus();
+            loginOtpStatus.textContent = data.message;
+            loginOtpStatus.classList.remove("text-muted", "text-danger");
+            loginOtpStatus.classList.add("text-success");
+          } else {
+            loginOtpStatus.textContent = data.message;
+            loginOtpStatus.classList.remove("text-muted", "text-success");
+            loginOtpStatus.classList.add("text-danger");
+          }
+        })
+        .catch(() => {
+          loginOtpStatus.textContent = "Error sending OTP. Try again.";
+          loginOtpStatus.classList.remove("text-muted", "text-success");
+          loginOtpStatus.classList.add("text-danger");
+        });
     });
   }
 </script>

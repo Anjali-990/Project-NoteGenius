@@ -1,6 +1,7 @@
 {% extends "index.html" %}
 {% load static %}
 {% block main %}
+
 <div class="main-content card bg-dark">
   <img
     src="{% static 'images/img1.jpg' %}"
@@ -16,7 +17,8 @@
       text, audio, or video.
     </p>
 
-    <!-- Login & Sign up buttons -->
+    {% if not user.is_authenticated %}
+    <!-- Login & Sign up buttons for guests -->
     <div class="d-flex gap-3 justify-content-center">
       <button
         type="button"
@@ -34,6 +36,14 @@
         Sign up
       </button>
     </div>
+    {% else %}
+    <!-- CTAs for logged-in users -->
+    <div class="d-flex gap-3 justify-content-center">
+      <a class="btn btn-outline-light" href="{% url 'profile' %}">Go to Profile</a>
+      <a class="btn btn-success" href="{% url 'textup' %}">Create Notes</a>
+    </div>
+    {% endif %}
+
   </div>
 </div>
 {% endblock %}
