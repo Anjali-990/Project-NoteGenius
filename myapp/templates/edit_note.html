@@ -1,0 +1,19 @@
+{% extends "index.html" %}
+{% block main %}
+<div class="container upload-section">
+  <div class="upload-card">
+    <h3>Edit Note</h3>
+    <form method="post">
+      {% csrf_token %}
+      <div class="mb-2">
+        <input type="text" name="title" class="form-control" value="{{ note.title }}" placeholder="Title (optional)" />
+      </div>
+      <div class="mb-2">
+        <textarea name="content" rows="12" class="form-control">{{ note.content }}</textarea>
+      </div>
+      <button class="btn btn-primary">Save</button>
+      <a href="{% url 'view_note' note.id %}" class="btn btn-outline-secondary">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

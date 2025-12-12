@@ -1,4 +1,5 @@
-{% extends "index.html" %} {% block main %}
+{% extends "index.html" %}
+{% block main %}
 
 <div class="container upload-section">
   <div class="upload-card">
@@ -8,7 +9,7 @@
       and create structured notes for you.
     </p>
 
-    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="">
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" action="{% url 'textup' %}">
       {% csrf_token %}
 
       <!-- DROP AREA -->
@@ -16,37 +17,18 @@
         <i class="fas fa-cloud-arrow-up upload-icon"></i>
         <h6 class="mt-2">Drag & Drop your text file here</h6>
         <p class="text-muted small">or click below to choose a file</p>
-        <input
-          type="file"
-          class="form-control mt-2"
-          id="fileInput"
-          name="file"
-        />
+        <input type="file" class="form-control mt-2" id="fileInput" name="file" />
       </div>
 
       <!-- TEXT AREA -->
       <div class="my-3">
-        <label class="form-label fw-semibold text-secondary"
-          >Or paste your text below:</label
-        >
+        <label class="form-label fw-semibold text-secondary">Or paste your text below:</label>
         <textarea
           class="form-control"
           rows="6"
           name="content"
           placeholder="Paste your content here..."
         ></textarea>
-      </div>
-
-      <!-- SUMMARY LENGTH -->
-      <div class="my-3">
-        <label class="form-label fw-semibold text-secondary"
-          >Select Notes Length:</label
-        >
-        <select class="form-control" name="summary_length">
-          <option value="short">Short (Quick Notes)</option>
-          <option value="medium" selected>Medium (Balanced)</option>
-          <option value="long">Long (Detailed)</option>
-        </select>
       </div>
 
       <!-- BUTTON -->
@@ -115,19 +97,20 @@
         <a href="{% url 'download_pdf' %}" class="btn btn-primary w-50">
           <i class="fas fa-file-pdf me-1"></i> Export as PDF
         </a>
-        <a
-          href="{% url 'download_docx' %}"
-          class="btn btn-outline-primary w-50"
-        >
+        <a href="{% url 'download_docx' %}" class="btn btn-outline-primary w-50">
           <i class="fas fa-file-word me-1"></i> Export as Word
         </a>
       </div>
+
       <!-- SAVE TO WEBSITE BUTTON -->
       <form action="{% url 'save_notes' %}" method="POST" class="mt-3">
         {% csrf_token %}
         <input type="hidden" name="notes_data" value="{{ summary|escape }}" />
+        <input type="hidden" name="note_type" value="text" />
+        <input type="hidden" name="title" value="{{ summary.short_summary|truncatechars:60 }}" />
         <button class="btn btn-success w-100">💾 Save Notes in Website</button>
       </form>
+
     </div>
     {% endif %}
   </div>

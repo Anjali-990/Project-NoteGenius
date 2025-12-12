@@ -9,14 +9,13 @@
       Sign up to start generating smart notes, QnA, and quizzes.
     </p>
 
-    <!-- optional error block (future backend ke liye) -->
     {% if error %}
     <div class="alert alert-danger">
       {{ error }}
     </div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" id="signupForm">
       {% csrf_token %}
 
       <div class="mb-3 text-start">
@@ -85,7 +84,7 @@
           type="text"
           class="form-control"
           id="signupOtpInput"
-          name="otp"
+          name="signup_otp"
           placeholder="Enter OTP"
           maxlength="6"
           disabled
@@ -134,22 +133,66 @@
 </section>
 
 <script>
-  // FRONTEND ONLY – fake OTP flow
+  // helper to get CSRF cookie
+  function getCsrfToken() {
+    const name = "csrftoken";
+    const cookies = document.cookie.split(";");
+    for (let c of cookies) {
+      c = c.trim();
+      if (c.startsWith(name + "=")) return decodeURIComponent(c.substring(name.length + 1));
+    }
+    return "";
+  }
+
   const signupSendOtpBtn = document.getElementById("signupSendOtp");
   const signupOtpInput = document.getElementById("signupOtpInput");
   const signupOtpStatus = document.getElementById("signupOtpStatus");
+  const emailInput = document.getElementById("email");
 
   if (signupSendOtpBtn) {
     signupSendOtpBtn.addEventListener("click", function () {
-      // yahan baad me actual API call kar sakte ho
-      signupOtpInput.disabled = false;
-      signupOtpInput.focus();
-      signupOtpStatus.textContent =
-        "Dummy: OTP sent! (Frontend only, backend baad me connect hoga)";
-      signupOtpStatus.classList.remove("text-muted");
-      signupOtpStatus.classList.add("text-success");
+      const loginId = (emailInput.value || "").trim();
+      if (!loginId) {
+        signupOtpStatus.textContent = "Please enter your email first.";
+        signupOtpStatus.classList.remove("text-muted", "text-success");
+        signupOtpStatus.classList.add("text-danger");
+        return;
+      }
+
+      signupOtpStatus.textContent = "Sending OTP...";
+      signupOtpStatus.classList.remove("text-danger", "text-success");
+      signupOtpStatus.classList.add("text-muted");
+
+      fetch("{% url 'send_login_otp' %}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCsrfToken()
+        },
+        body: new URLSearchParams({ login_id: loginId })
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success) {
+          signupOtpInput.disabled = false;
+          signupOtpInput.focus();
+          signupOtpStatus.textContent = data.message || "OTP sent.";
+          signupOtpStatus.classList.remove("text-muted", "text-danger");
+          signupOtpStatus.classList.add("text-success");
+        } else {
+          signupOtpStatus.textContent = data.message || "Failed to send OTP.";
+          signupOtpStatus.classList.remove("text-muted", "text-success");
+          signupOtpStatus.classList.add("text-danger");
+        }
+      })
+      .catch(() => {
+        signupOtpStatus.textContent = "Network error sending OTP.";
+        signupOtpStatus.classList.remove("text-muted", "text-success");
+        signupOtpStatus.classList.add("text-danger");
+      });
     });
   }
 </script>
+
 
 {% endblock %}

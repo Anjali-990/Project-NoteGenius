@@ -1,0 +1,14 @@
+{% extends "index.html" %}
+{% block main %}
+<div class="container upload-section">
+  <div class="upload-card">
+    <h3>Delete Note?</h3>
+    <p>Are you sure you want to delete <strong>{{ note.title|default:"Untitled" }}</strong>?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger">Yes, delete</button>
+      <a class="btn btn-secondary" href="{% url 'savednotes' %}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

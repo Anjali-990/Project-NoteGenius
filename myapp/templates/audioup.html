@@ -49,7 +49,7 @@
             class="btn btn-outline-danger btn-sm"
             disabled
           >
-            <i class="fas fa-square me-2" style="color: #dc3545 !important; opacity: 1 !important;"></i> 
+            <i class="fas fa-square me-2" style="color: #dc3545 !important; opacity: 1 !important;"></i>
             <span style="color: #dc3545 !important; font-weight: bold; opacity: 1 !important;">Stop</span>
           </button>
         </div>
@@ -57,8 +57,8 @@
         <audio id="audioPreview" controls class="mt-3 w-100 d-none"></audio>
       </div>
 
-      <div class="my-3">
-        <!-- optional: let user choose short/medium/long if you want -->
+      <!-- hidden length selector (kept hidden per requirement) -->
+      <div class="my-3 d-none" id="summaryLengthWrapper">
         <select id="summaryLengthSelect" class="form-control" name="summary_length" style="max-width:260px;">
           <option value="medium" selected>Medium (Balanced)</option>
           <option value="short">Short (Quick)</option>
@@ -81,7 +81,6 @@
       <div id="transcriptBox" class="mb-3"></div>
 
       <div id="summaryBox" class="mt-2">
-        <!-- short summary -->
         <h6>⭐ Short Summary</h6>
         <p id="shortSummary"></p>
 
@@ -96,43 +95,49 @@
       </div>
 
       <div class="d-flex gap-2 mt-3">
-        <a id="downloadPdfBtn" href="{% url 'download_pdf' %}" class="btn btn-primary w-50" target="_blank">
+        <a id="downloadPdfBtn" href="{% url 'download_pdf' %}" class="btn btn-primary w-50 disabled" target="_blank">
           <i class="fas fa-file-pdf me-1"></i> Export as PDF
         </a>
-        <a id="downloadDocxBtn" href="{% url 'download_docx' %}" class="btn btn-outline-primary w-50" target="_blank">
+        <a id="downloadDocxBtn" href="{% url 'download_docx' %}" class="btn btn-outline-primary w-50 disabled" target="_blank">
           <i class="fas fa-file-word me-1"></i> Export as Word
         </a>
+      </div>
+
+      <!-- SAVE: visible after generation; submits hidden form -->
+      <div class="mt-3">
+        <input type="text" id="noteTitleInput" class="form-control mb-2" placeholder="Enter title (optional)" style="max-width:520px;">
+        <button id="saveNotesBtn" class="btn btn-success w-100 disabled">💾 Save Notes</button>
       </div>
 
     </div>
   </div>
 </section>
 
-<script>
-  // CSRF helper (Django)
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== "") {
-      const cookies = document.cookie.split(";");
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        // Does this cookie string begin with the name we want?
-        if (cookie.substring(0, name.length + 1) === (name + "=")) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
+<!-- Hidden form used to POST to Django save_notes (regular form POST so your view handles it) -->
+<form id="saveNotesForm" action="{% url 'save_notes' %}" method="POST" style="display:none;">
+  {% csrf_token %}
+  <input type="hidden" name="notes_data" id="hiddenNotesData" value="">
+  <input type="hidden" name="title" id="hiddenTitle" value="">
+  <input type="hidden" name="note_type" id="hiddenType" value="audio">
+</form>
 
-  // Recording logic
+<script>
+  function qs(id){ return document.getElementById(id); }
+
   let mediaRecorder;
   let audioChunks = [];
-  const startBtn = document.getElementById("startRecord");
-  const stopBtn = document.getElementById("stopRecord");
-  const audioPreview = document.getElementById("audioPreview");
-  const audioInput = document.getElementById("audioInput");
+  const startBtn = qs("startRecord");
+  const stopBtn = qs("stopRecord");
+  const audioPreview = qs("audioPreview");
+  const audioInput = qs("audioInput");
+  const form = qs("audioUploadForm");
+  const generateBtn = qs("generateAudioBtn");
+  const resultSection = qs("audioResultSection");
+  const saveBtn = qs("saveNotesBtn");
+  const saveForm = qs("saveNotesForm");
+  const hiddenNotesData = qs("hiddenNotesData");
+  const hiddenTitle = qs("hiddenTitle");
+  const noteTitleInput = qs("noteTitleInput");
 
   startBtn.addEventListener("click", async () => {
     try {
@@ -140,13 +145,9 @@
       mediaRecorder = new MediaRecorder(stream);
       audioChunks = [];
       mediaRecorder.start();
-
       startBtn.disabled = true;
       stopBtn.disabled = false;
-
-      mediaRecorder.ondataavailable = (e) => {
-        audioChunks.push(e.data);
-      };
+      mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
     } catch (err) {
       alert("Microphone access denied or not available.");
     }
@@ -157,97 +158,79 @@
     mediaRecorder.stop();
     stopBtn.disabled = true;
     startBtn.disabled = false;
-
     mediaRecorder.onstop = () => {
       const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
       const audioURL = URL.createObjectURL(audioBlob);
-
       audioPreview.src = audioURL;
       audioPreview.classList.remove("d-none");
-
-      // attach blob to file input (optional) so user can re-submit easily
-      // create a File object and put into DataTransfer for the input element
       const file = new File([audioBlob], "recorded_audio.wav", { type: "audio/wav" });
-      const dataTransfer = new DataTransfer();
-      dataTransfer.items.add(file);
-      audioInput.files = dataTransfer.files;
+      const dt = new DataTransfer();
+      dt.items.add(file);
+      audioInput.files = dt.files;
     };
   });
 
-  // Submit handler - AJAX
-  const form = document.getElementById("audioUploadForm");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    const btn = document.getElementById("generateAudioBtn");
-    btn.disabled = true;
-    const orig = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+    generateBtn.disabled = true;
+    const orig = generateBtn.innerHTML;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
 
     const fd = new FormData();
     const file = audioInput.files[0];
-    if (file) {
-      fd.append("file", file, file.name);
-    } else {
+    if (!file) {
       alert("Please upload or record audio first.");
-      btn.disabled = false;
-      btn.innerHTML = orig;
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = orig;
       return;
     }
-
-    // add summary length selection if desired
-    const summaryLen = document.getElementById("summaryLengthSelect").value;
+    fd.append("file", file, file.name);
+    const summaryLen = qs("summaryLengthSelect")?.value || "medium";
     fd.append("summary_length", summaryLen);
-
-    const csrftoken = getCookie("csrftoken");
 
     try {
       const resp = await fetch("{% url 'audio_upload' %}", {
         method: "POST",
         body: fd,
-        headers: {
-          "X-CSRFToken": csrftoken
-        },
+        credentials: "same-origin"
       });
       const data = await resp.json();
-      if (!data.success) {
-        alert(data.error || "Failed to process audio.");
-        btn.disabled = false;
-        btn.innerHTML = orig;
+      if (!data || !data.success) {
+        alert(data?.error || "Failed to process audio.");
         return;
       }
 
-      // show result section and fill values
-      document.getElementById("audioResultSection").classList.remove("d-none");
-      document.getElementById("transcriptBox").innerText = "Transcript: " + (data.transcript || "");
-      document.getElementById("shortSummary").innerText = data.summary.short_summary || "";
-      const bulletsEl = document.getElementById("bulletsList");
-      bulletsEl.innerHTML = "";
-      (data.summary.bullets || []).forEach(b => {
-        const li = document.createElement("li");
-        li.innerText = b;
-        bulletsEl.appendChild(li);
-      });
-      document.getElementById("detailedExplanation").innerText = data.summary.detailed_explanation || "";
-      const termsEl = document.getElementById("keyTermsList");
-      termsEl.innerHTML = "";
-      (data.summary.key_terms || []).forEach(t => {
-        const li = document.createElement("li");
-        li.innerText = t;
-        termsEl.appendChild(li);
-      });
+      resultSection.classList.remove("d-none");
+      qs("transcriptBox").innerText = "Transcript: " + (data.transcript || "");
+      qs("shortSummary").innerText = data.summary?.short_summary || "";
+      const bulletsEl = qs("bulletsList"); bulletsEl.innerHTML = "";
+      (data.summary?.bullets || []).forEach(b => { const li = document.createElement("li"); li.innerText = b; bulletsEl.appendChild(li); });
+      qs("detailedExplanation").innerText = data.summary?.detailed_explanation || "";
+      const termsEl = qs("keyTermsList"); termsEl.innerHTML = "";
+      (data.summary?.key_terms || []).forEach(t => { const li = document.createElement("li"); li.innerText = t; termsEl.appendChild(li); });
 
-      // Downloads (these endpoints read from session latest_notes)
-      document.getElementById("downloadPdfBtn").classList.remove("disabled");
-      document.getElementById("downloadDocxBtn").classList.remove("disabled");
+      qs("downloadPdfBtn").classList.remove("disabled");
+      qs("downloadDocxBtn").classList.remove("disabled");
+
+      hiddenNotesData.value = JSON.stringify(data.summary || {});
+      hiddenTitle.value = (noteTitleInput.value || (data.summary?.short_summary || "Audio Note")).slice(0, 200);
+
+      saveBtn.classList.remove("disabled");
+      saveBtn.innerText = "💾 Save Notes";
 
     } catch (err) {
       console.error(err);
       alert("Server error while processing audio.");
     } finally {
-      btn.disabled = false;
-      btn.innerHTML = orig;
+      generateBtn.disabled = false;
+      generateBtn.innerHTML = orig;
     }
+  });
+
+  saveBtn.addEventListener("click", (e) => {
+    if (saveBtn.classList.contains("disabled")) return;
+    hiddenTitle.value = (noteTitleInput.value || hiddenTitle.value || "Untitled Note").slice(0, 200);
+    saveForm.submit();
   });
 </script>
 

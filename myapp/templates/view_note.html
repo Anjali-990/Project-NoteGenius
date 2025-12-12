@@ -1,0 +1,18 @@
+{% extends "index.html" %}
+{% block main %}
+<div class="container upload-section">
+  <div class="upload-card">
+    <h3>{{ note.title|default:"Untitled" }}</h3>
+    <small class="text-muted">Saved on {{ note.created_at|date:"j M Y, H:i" }}</small>
+    <hr>
+    <div>
+      <pre style="white-space:pre-wrap;">{{ note.content|safe }}</pre>
+    </div>
+
+    <div class="mt-3">
+      <a href="{% url 'edit_note' note.id %}" class="btn btn-outline-secondary">Edit</a>
+      <a href="{% url 'savednotes' %}" class="btn btn-outline-primary">Back</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

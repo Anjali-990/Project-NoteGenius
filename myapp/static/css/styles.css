@@ -44,7 +44,6 @@ body {
     background-color: #34495e;
   }
 
-  /* main area for all inner pages */
   .main-content,
   .upload-section {
     margin-left: 220px;
@@ -71,7 +70,7 @@ body {
   }
 }
 
-/* Optional hero image on home (if used) */
+/* HERO IMAGE */
 .card-img {
   opacity: 0.6;
   min-height: 100vh;
@@ -80,16 +79,15 @@ body {
 
 /* ==========================
    GLOBAL DARK MODE
-   (theme controlled by html[data-theme])
 ========================== */
 
-/* Body in dark mode */
+/* Body */
 html[data-theme="dark"] body {
   background-color: #020617 !important;
   color: #e5e7eb !important;
 }
 
-/* Sidebar ko same rakhen (light jaisa hi) */
+/* Sidebar stays same */
 html[data-theme="dark"] .desktop-sidebar {
   background-color: #2c3e50 !important;
   color: #ffffff !important;
@@ -99,160 +97,147 @@ html[data-theme="dark"] .desktop-sidebar a {
   color: #ffffff !important;
 }
 
-html[data-theme="dark"] .desktop-sidebar a:hover {
-  background-color: #34495e !important;
-}
+/* --------------------------
+   MAIN DARK MODE COMPONENTS
+--------------------------- */
 
-/* Common cards / containers */
+/* Cards */
 html[data-theme="dark"] .card,
 html[data-theme="dark"] .upload-card,
-html[data-theme="dark"] .about-container,
+html[data-theme="dark"] .drop-area,
+html[data-theme="dark"] .note-card,
 html[data-theme="dark"] .profile-container,
 html[data-theme="dark"] .feedback-wrapper,
 html[data-theme="dark"] .settings-wrapper,
-html[data-theme="dark"] .quiz-card,
 html[data-theme="dark"] .qna-card,
-html[data-theme="dark"] .note-card {
-  background-color: #020617 !important;
+html[data-theme="dark"] .quiz-card,
+html[data-theme="dark"] #audioResultSection,
+html[data-theme="dark"] #summaryBox,
+html[data-theme="dark"] #transcriptBox {
+  background-color: #071226 !important;
   color: #e5e7eb !important;
   border-color: #1f2937 !important;
 }
 
-/* Form controls */
+/* Inputs / text fields */
 html[data-theme="dark"] input,
+html[data-theme="dark"] textarea,
 html[data-theme="dark"] select,
-html[data-theme="dark"] textarea {
-  background-color: #020617 !important;
+html[data-theme="dark"] .form-control {
+  background-color: #071226 !important;
   color: #e5e7eb !important;
-  border-color: #334155 !important;
+  border: 1px solid #334155 !important;
 }
 
-html[data-theme="dark"] input::placeholder,
-html[data-theme="dark"] textarea::placeholder {
-  color: #64748b !important;
+html[data-theme="dark"] ::placeholder {
+  color: #9aa6b2 !important;
 }
 
-/* Muted / secondary text */
+/* Text muted */
 html[data-theme="dark"] .text-muted,
-html[data-theme="dark"] .section-sub,
-html[data-theme="dark"] small,
+html[data-theme="dark"] .form-label,
 html[data-theme="dark"] label,
-html[data-theme="dark"] .form-label {
+html[data-theme="dark"] small {
   color: #cbd5e1 !important;
 }
 
-/* Links inside content in dark mode */
-html[data-theme="dark"] .card a,
+/* Links inside cards */
 html[data-theme="dark"] .upload-card a,
-html[data-theme="dark"] .about-container a,
-html[data-theme="dark"] .profile-container a,
-html[data-theme="dark"] .feedback-wrapper a,
-html[data-theme="dark"] .settings-wrapper a,
-html[data-theme="dark"] .quiz-card a,
-html[data-theme="dark"] .qna-card a,
+html[data-theme="dark"] .card a,
 html[data-theme="dark"] .note-card a {
-  color: #bfdbfe;
+  color: #93c5fd !important;
 }
 
-html[data-theme="dark"] .card a:hover,
-html[data-theme="dark"] .upload-card a:hover,
-html[data-theme="dark"] .about-container a:hover,
-html[data-theme="dark"] .profile-container a:hover,
-html[data-theme="dark"] .feedback-wrapper a:hover,
-html[data-theme="dark"] .settings-wrapper a:hover,
-html[data-theme="dark"] .quiz-card a:hover,
-html[data-theme="dark"] .qna-card a:hover,
-html[data-theme="dark"] .note-card a:hover {
-  color: #93c5fd;
+html[data-theme="dark"] h1,
+html[data-theme="dark"] h2,
+html[data-theme="dark"] h3,
+html[data-theme="dark"] h4,
+html[data-theme="dark"] h5 {
+  color: #f1f5f9 !important;
 }
-/* Force Generate Button Blue (fix accidental purple theme override) */
+
+/* Avoid icon color overrides */
+html[data-theme="dark"] *:not(.fa):not(.fas):not(.fa-solid) {}
+
+/* ==========================
+   GENERATE BUTTON FIX
+========================== */
 .generate-btn {
-    background-color: #3b82f6 !important; /* Blue */
-    color: white !important;
-    border: none !important;
+  background-color: #3b82f6 !important;
+  color: white !important;
+  border: none !important;
 }
 
 .generate-btn:hover {
-    background-color: #2563eb !important; /* Darker blue */
-    color: white !important;
+  background-color: #2563eb !important;
+  color: white !important;
 }
 
-/* Global Style for All H3 Headings */
+/* ==========================
+   HEADINGS (Blue)
+========================== */
 h3 {
-    text-align: center !important;
-    font-weight: 700 !important;
-    color: #3b82f6 !important;  /* your exact blue */
-    margin-bottom: 15px !important;
+  text-align: center !important;
+  font-weight: 700 !important;
+  color: #3b82f6 !important;
+  margin-bottom: 15px !important;
 }
 
-/* Dark mode me bhi same blue */
 [data-theme="dark"] h3 {
-    color: #3b82f6 !important;
+  color: #3b82f6 !important;
 }
 
-/* ============================
-   ABOUT PAGE DARK MODE FIX
-============================ */
-
-/* Main container background */
+/* ==========================
+   ABOUT PAGE DARK FIXES
+========================== */
 [data-theme="dark"] .about-container {
-    background-color: #0f172a !important;   /* dark navy */
-    color: #e5e7eb !important;
-    border-color: #1e293b !important;
+  background-color: #0f172a !important;
+  color: #e5e7eb !important;
+  border-color: #1e293b !important;
 }
 
-/* Inner cards (why, what, teams, steps, audiences) */
 [data-theme="dark"] .about-card,
 [data-theme="dark"] .team-card,
 [data-theme="dark"] .step-card,
 [data-theme="dark"] .audience-card {
-    background-color: #1e293b !important;  /* soft dark grey */
-    color: #e5e7eb !important;
-    border-color: #334155 !important;
+  background-color: #1e293b !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
 }
 
-/* Headings inside cards */
 [data-theme="dark"] .about-card h3,
 [data-theme="dark"] .team-card h5,
 [data-theme="dark"] .step-card h4,
 [data-theme="dark"] .audience-card h4 {
-    color: #f1f5f9 !important;
+  color: #f1f5f9 !important;
 }
 
-/* Icons in dark mode */
 [data-theme="dark"] .audience-icon,
 [data-theme="dark"] .step-number {
-    color: #93c5fd !important;
-    background: #1e293b !important;
+  color: #93c5fd !important;
+  background: #1e293b !important;
 }
 
-/* ============================
-   ABOUT PAGE – STATS & EXTRA CARDS DARK MODE
-============================ */
-
+/* ==========================
+   STATS CARDS
+========================== */
 [data-theme="dark"] .stat-card,
 [data-theme="dark"] .stats-card,
 [data-theme="dark"] .span-card {
-    background-color: #1e293b !important;   /* same as other cards */
-    color: #e5e7eb !important;
-    border-color: #334155 !important;
+  background-color: #1e293b !important;
+  color: #e5e7eb !important;
+  border-color: #334155 !important;
 }
 
-/* Headings inside these cards */
-[data-theme="dark"] .stat-card h3,
-[data-theme="dark"] .stats-card h3,
-[data-theme="dark"] .span-card h3 {
-    color: #f1f5f9 !important;
-}
-
-/* Any small text inside these cards */
 [data-theme="dark"] .stat-card p,
 [data-theme="dark"] .stats-card p,
 [data-theme="dark"] .span-card p {
-    color: #cbd5e1 !important;
+  color: #cbd5e1 !important;
 }
 
-/* Pill-style chips / tags (light mode) */
+/* ==========================
+   CHIPS
+========================== */
 .chip {
   display: inline-flex;
   align-items: center;
@@ -261,107 +246,20 @@ h3 {
   border-radius: 999px;
   font-size: 0.8rem;
   font-weight: 600;
-  background-color: #e9f2ff;   /* light blue background */
+  background-color: #e9f2ff;
   color: #0f172a;
 }
 
 .chip i {
   font-size: 0.8rem;
 }
-/* Chips in dark mode */
+
 [data-theme="dark"] .chip {
-  background-color: #1e293b !important;  /* dark slate */
+  background-color: #1e293b !important;
   color: #e5e7eb !important;
   border-color: #334155 !important;
 }
 
 [data-theme="dark"] .chip i {
-  color: #93c5fd !important;  /* soft blue icon */
-}
-/* ======= DARK MODE DISPLAY FIXES (paste near end of styles.css) ======= */
-
-/* Ensure main result/cards have readable dark background & text */
-html[data-theme="dark"] .upload-card,
-html[data-theme="dark"] .card,
-html[data-theme="dark"] .note-card,
-html[data-theme="dark"] .about-container,
-html[data-theme="dark"] .profile-container,
-html[data-theme="dark"] .feedback-wrapper,
-html[data-theme="dark"] .settings-wrapper,
-html[data-theme="dark"] .quiz-card,
-html[data-theme="dark"] .qna-card,
-html[data-theme="dark"] .drop-area,
-html[data-theme="dark"] .result-section,
-html[data-theme="dark"] .upload-section {
-  background-color: #07101a !important; /* deep navy */
-  color: #e6eef8 !important;            /* light text */
-  border: 1px solid #15232b !important;
-}
-
-/* Force paragraphs, headings and list text to be visible */
-html[data-theme="dark"] .upload-card p,
-html[data-theme="dark"] .upload-card h3,
-html[data-theme="dark"] .upload-card h5,
-html[data-theme="dark"] .result-section p,
-html[data-theme="dark"] .result-section li,
-html[data-theme="dark"] .result-section h6,
-html[data-theme="dark"] .drop-area h6,
-html[data-theme="dark"] label,
-html[data-theme="dark"] .form-label,
-html[data-theme="dark"] textarea,
-html[data-theme="dark"] input,
-html[data-theme="dark"] select {
-  color: #e6eef8 !important;
-}
-
-/* Fix for any elements using bg-light (override Bootstrap classes) */
-html[data-theme="dark"] .bg-light {
-  background-color: transparent !important;
-  color: inherit !important;
-}
-
-/* Make links readable */
-html[data-theme="dark"] a, html[data-theme="dark"] a:link {
   color: #93c5fd !important;
-}
-
-/* Buttons - ensure contrast */
-html[data-theme="dark"] .btn,
-html[data-theme="dark"] .generate-btn {
-  color: #f8fafc !important;
-}
-
-/* Audio transcript / summary boxes */
-html[data-theme="dark"] #transcriptBox,
-html[data-theme="dark"] #summaryBox,
-html[data-theme="dark"] #audioResultSection,
-html[data-theme="dark"] #shortSummary,
-html[data-theme="dark"] #detailedExplanation {
-  background: #06121a !important;
-  color: #e6eef8 !important;
-  padding: 10px !important;
-  border-radius: 6px !important;
-  border: 1px solid #13303b !important;
-}
-
-/* Make <textarea> placeholders readable */
-html[data-theme="dark"] textarea::placeholder,
-html[data-theme="dark"] input::placeholder {
-  color: #94a3b8 !important;
-}
-
-/* Force icons color */
-html[data-theme="dark"] .fas,
-html[data-theme="dark"] .fa-lightbulb {
-  color: #60a5fa !important;
-}
-
-/* Small detail: make any .text-muted more visible */
-html[data-theme="dark"] .text-muted { color: #94a3b8 !important; }
-
-/* Important: highest specificity for problem elements */
-html[data-theme="dark"] .upload-card.bg-light,
-html[data-theme="dark"] .result-section.bg-light {
-  background-color: #07101a !important;
-  color: #e6eef8 !important;
 }
