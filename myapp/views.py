@@ -5,6 +5,10 @@ import json
 import random
 import tempfile
 import logging
+from pydub import AudioSegment
+AudioSegment.converter = "ffmpeg"
+AudioSegment.ffprobe = "ffprobe"
+
 
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
@@ -222,39 +226,32 @@ def chunk_text_dynamic(text):
 def generate_fast_notes(text, summary_length="medium"):
     if summarizer is None:
         raise RuntimeError("Summarizer is not initialized.")
+
     params = LENGTH_PRESETS.get(summary_length, LENGTH_PRESETS["medium"])
-    chunks = chunk_text_dynamic(text)
-    partial_summaries = []
 
-    for ch in chunks:
-        try:
-            out = summarizer(ch, max_length=params["max_length"], min_length=params["min_length"], truncation=True, do_sample=False)
-            partial_summaries.append(out[0].get("summary_text", "").strip())
-        except Exception:
-            partial_summaries.append(ch[:800].strip())
+    # 🔥 SPEED BOOST: hard text limit
+    text = text[:3500]
 
-    if len(partial_summaries) > 1:
-        combined = " ".join(partial_summaries)
-        try:
-            final_out = summarizer(combined, max_length=params["max_length"], min_length=params["min_length"], truncation=True, do_sample=False)
-            combined_summary = final_out[0].get("summary_text", combined)
-        except Exception:
-            combined_summary = combined
-    else:
-        combined_summary = partial_summaries[0] if partial_summaries else ""
+    output = summarizer(
+        text,
+        max_length=params["max_length"],
+        min_length=params["min_length"],
+        do_sample=False
+    )[0]["summary_text"]
 
-    combined_summary = combined_summary.strip()
-    sentences = [s.strip() for s in combined_summary.split(". ") if s.strip()]
+    output = output.strip()
+    sentences = [s.strip() for s in output.split(". ") if s.strip()]
 
-    short_summary = sentences[0] if sentences else (combined_summary[:140] + "...")
-    bullets = sentences[1:6] if len(sentences) > 1 else []
-    words = [w.strip(".,;:()") for w in combined_summary.split() if len(w) > 5]
-    key_terms = list(dict.fromkeys(words))[:20]
+    short_summary = sentences[0] if sentences else output[:120]
+    bullets = sentences[1:6]
+    key_terms = list(dict.fromkeys(
+        [w.strip(".,;:()") for w in output.split() if len(w) > 5]
+    ))[:15]
 
     return {
         "short_summary": short_summary,
         "bullets": bullets,
-        "detailed_explanation": combined_summary,
+        "detailed_explanation": output,
         "key_terms": key_terms
     }
 
@@ -269,7 +266,7 @@ def textup(request):
         if request.FILES.get("file"):
             uploaded_file = request.FILES["file"]
             fname = uploaded_file.name.lower()
-            if uploaded_file.size > 15 * 1024 * 1024:
+            if uploaded_file.size > 50 * 1024 * 1024:
                 error = "File too large. Please upload a smaller file (max 15 MB)."
             else:
                 try:
@@ -576,3 +573,32 @@ def feedback(request):
 
 def settings_page(request):
     return render(request, "settings.html")
+
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Profile, Notes
+
+
+@login_required
+def profile(request):
+    user = request.user
+
+    # get or create profile
+    profile, created = Profile.objects.get_or_create(user=user)
+
+    if request.method == "POST":
+        profile.occupation = request.POST.get("occupation", "")
+        profile.usage = request.POST.get("usage", "")
+        profile.bio = request.POST.get("bio", "")
+        profile.save()
+
+        messages.success(request, "Profile updated successfully!")
+        return redirect("profile")
+
+    context = {
+        "profile": profile,
+        "total_notes": Notes.objects.filter(user=user).count(),
+        "total_quizzes": 0,  # jab QuizRecord add hoga tab connect karenge
+        "total_qna": 0,
+    }
+    return render(request, "profile.html", context)

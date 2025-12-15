@@ -6,10 +6,14 @@ import json
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    phone = models.CharField(max_length=30, blank=True, null=True)
+    occupation = models.CharField(max_length=100, blank=True)
+    usage = models.CharField(max_length=100, blank=True)
+    bio = models.TextField(blank=True)
 
     def __str__(self):
-        return f"{self.user.username} profile"
+        return self.user.username
+
+
 
 class EmailOTP(models.Model):
     """

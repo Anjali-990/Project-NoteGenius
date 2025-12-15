@@ -2,45 +2,146 @@
 {% load static %}
 {% block main %}
 
-<!-- Hero: clean background (no shadow / no rounded corners) -->
+<style>
+  .home-hero {
+    position: relative;
+    height: 90vh;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: brightness(0.65);
+  }
+
+  .hero-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    background: linear-gradient(
+      rgba(0, 0, 0, 0.55),
+      rgba(0, 0, 0, 0.75)
+    );
+  }
+
+  .hero-title {
+    font-size: clamp(2.2rem, 4vw, 3rem);
+    color: #fff;
+    letter-spacing: 1px;
+    margin-bottom: 1rem;
+    animation: fadeUp 0.9s ease-out;
+  }
+
+  .hero-subtext {
+    color: rgba(255, 255, 255, 0.95);
+    max-width: 900px;
+    font-size: 1.1rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 1.1s ease-out;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 1.8rem;
+    animation: fadeUp 1.3s ease-out;
+  }
+
+  .glass-box {
+    padding: 0.8rem 1.4rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(6px);
+    animation: fadeUp 1.5s ease-out;
+  }
+
+  .welcome-name {
+    margin-bottom: 0;
+    font-weight: 600;
+    color: rgba(227, 236, 242, 0.95);
+  }
+
+  .welcome-email {
+    font-size: 0.95rem;
+    color: rgba(226, 232, 236, 0.85);
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .hero-subtext {
+      font-size: 1rem;
+    }
+  }
+</style>
+
 <div class="home-hero">
-  <!-- Keep the same image you used before -->
   <img
     src="{% static 'images/img1.jpg' %}"
     alt="AI workspace background"
     class="hero-bg"
   />
 
-  <!-- overlay content centered -->
   <div class="hero-overlay">
-    <h1 class="unique-dashboard-title" style="font-size: 2.7rem; color: #fff;">
+    <h1 class="unique-dashboard-title hero-title">
       WELCOME TO NOTEGENIUS
     </h1>
-    <p class="card-text mb-3" style="color: rgba(255,255,255,0.95); max-width: 900px;">
-      This is your AI-powered workspace to generate notes, Q&A, and quizzes from
+
+    <p class="hero-subtext">
+      Your AI-powered workspace to generate notes, Q&A, and quizzes from
       text, audio, or video.
     </p>
 
     {% if not user.is_authenticated %}
-    <div class="cta-row">
-      <button type="button" class="btn btn-outline-light me-2" onclick="window.location.href='{% url 'login' %}'">Login</button>
-      <button type="button" class="btn btn-primary" onclick="window.location.href='{% url 'signup' %}'">Sign up</button>
-    </div>
-    {% else %}
-    <div class="cta-row">
-      <a class="btn btn-outline-light me-2" href="{% url 'profile' %}">View Profile</a>
-      <a class="btn btn-success me-2" href="{% url 'textup' %}">Create Notes</a>
-      <a class="btn btn-danger" href="{% url 'logout' %}">Logout</a>
-    </div>
-
-    <div class="hero-welcome">
-      <p style="margin-bottom:0; font-weight:600; color: rgba(4, 0, 0, 0.98);">
-        👋 Welcome, {{ user.first_name|default:user.username }}
-      </p>
-      <div style="color: rgba(0, 0, 0, 0.85); font-size:0.95rem;">
-        {{ user.email|default:'' }}
+      <div class="cta-row">
+        <button class="btn btn-outline-light px-4"
+                onclick="window.location.href='{% url 'login' %}'">
+          Login
+        </button>
+        <button class="btn btn-primary px-4"
+                onclick="window.location.href='{% url 'signup' %}'">
+          Sign up
+        </button>
       </div>
-    </div>
+    {% else %}
+      <div class="cta-row">
+        <a class="btn btn-outline-light px-4" href="{% url 'profile' %}">
+          Profile
+        </a>
+        <a class="btn btn-success px-4" href="{% url 'textup' %}">
+          Create Notes
+        </a>
+        <a class="btn btn-danger px-4" href="{% url 'logout' %}">
+          Logout
+        </a>
+      </div>
+
+      <div class="glass-box">
+        <p class="welcome-name">
+          👋 Welcome, {{ user.first_name|default:user.username }}
+        </p>
+        <div class="welcome-email">
+          {{ user.email|default:'' }}
+        </div>
+      </div>
     {% endif %}
   </div>
 </div>
