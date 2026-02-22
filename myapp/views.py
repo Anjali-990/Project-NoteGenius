@@ -3,13 +3,15 @@ import os
 import io
 import json
 import random
+import re
 import tempfile
 import logging
 from pydub import AudioSegment
 AudioSegment.converter = "ffmpeg"
 AudioSegment.ffprobe = "ffprobe"
-
-
+from googletrans import Translator
+translator = Translator()
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -33,6 +35,10 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+MAX_WORDS = 20000
 # optional audio libs
 try:
     import speech_recognition as sr
@@ -40,34 +46,57 @@ try:
 except Exception:
     SR_AVAILABLE = False
 
-# transformers summarizer / asr (optional)
-os.environ["TRANSFORMERS_NO_TF"] = "1"
+# transformers summarizer / asr
+import torch
+from transformers import pipeline
+
 logger = logging.getLogger(__name__)
 
-try:
-    from transformers import pipeline
-    summarizer = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
-except Exception as e:
-    summarizer = None
-    logger.warning("Summarizer pipeline not available: %s", e)
-
+summarizer = None
 asr_pipeline = None
-try:
-    from transformers import pipeline as _pipeline
-    try:
-        asr_pipeline = _pipeline("automatic-speech-recognition", model="openai/whisper-small")
-    except Exception as e:
-        asr_pipeline = None
-        logger.info("ASR pipeline not initialized: %s", e)
-except Exception:
-    asr_pipeline = None
+translator_pipeline = None
 
+device = 0 if torch.cuda.is_available() else -1
+
+try:
+    summarizer = pipeline(
+        "summarization",
+        model="sshleifer/distilbart-cnn-6-6",
+        device=device
+    )
+    print("✅ Summarizer loaded successfully")
+except Exception as e:
+    print("❌ Summarizer failed:", e)
+    logger.exception("Summarizer initialization error")
+
+try:
+    asr_pipeline = pipeline(
+        "automatic-speech-recognition",
+        model="openai/whisper-base",
+        device=device,
+        torch_dtype=torch.float16 if device == 0 else torch.float32
+    )
+    print("✅ ASR loaded successfully")
+except Exception as e:
+    print("❌ ASR failed:", e)
+    logger.exception("ASR initialization error")
+
+try:
+    translator_pipeline = pipeline(
+        "translation",
+        model="Helsinki-NLP/opus-mt-mul-en",
+        device=device
+    )
+    print("✅ Translator loaded successfully")
+except Exception as e:
+    print("❌ Translator failed:", e)
+    logger.exception("Translator initialization error")
 # presets
 LENGTH_PRESETS = {
-    "short":  {"max_length": 60,  "min_length": 20},
-    "medium": {"max_length": 150, "min_length": 60},
-    "long":   {"max_length": 300, "min_length": 150},
-}
+    "short":  {"max_length": 120,  "min_length": 40},
+    "medium": {"max_length": 250,  "min_length": 120},
+    "long":   {"max_length": 450,  "min_length": 220},
+}   
 
 MAX_PROCESS_CHARS = 200000
 
@@ -224,88 +253,233 @@ def chunk_text_dynamic(text):
 
 
 def generate_fast_notes(text, summary_length="medium"):
-    if summarizer is None:
-        raise RuntimeError("Summarizer is not initialized.")
 
-    params = LENGTH_PRESETS.get(summary_length, LENGTH_PRESETS["medium"])
+    # 🔥 Hinglish detection & conversion
+    import re
+    # 🔥 Clean repeated junk words
+    transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', text)
+    # remove weird broken fragments
+    transcript = re.sub(r'[^\x00-\x7F]+', ' ', transcript)
+    # remove multiple spaces
+    transcript = re.sub(r'\s+', ' ', transcript).strip()
+    hinglish_words = re.findall(r"\b(hai|tha|thi|kya|kaise|kyun|aur|lekin|matlab|krna|hona)\b", transcript.lower())
 
-    # 🔥 SPEED BOOST: hard text limit
-    text = text[:3500]
+    if len(hinglish_words) > 5:
+        try:
+            text = translator.translate(text, dest="en").text
+        except:
+            pass
 
-    output = summarizer(
-        text,
-        max_length=params["max_length"],
-        min_length=params["min_length"],
-        do_sample=False
-    )[0]["summary_text"]
 
-    output = output.strip()
-    sentences = [s.strip() for s in output.split(". ") if s.strip()]
+    words = text.split()
+    total_words = len(words)
 
-    short_summary = sentences[0] if sentences else output[:120]
-    bullets = sentences[1:6]
+    # 🔹 Desired summary ratio (approx 26%)
+    target_summary_words = int(total_words * 0.26)
+
+    # 🔹 Safe chunk size for distilbart
+    max_chunk_words = 900
+    chunks = []
+
+    for i in range(0, total_words, max_chunk_words):
+        chunk = " ".join(words[i:i + max_chunk_words])
+        chunks.append(chunk)
+
+    partial_summaries = []
+
+    for chunk in chunks:
+        chunk_word_count = len(chunk.split())
+
+        # ratio for each chunk
+        chunk_target = int(chunk_word_count * 0.26)
+
+        # safety bounds
+        if chunk_target < 120:
+            max_len = 150
+        elif chunk_target < 300:
+            max_len = 300
+        elif chunk_target < 600:
+            max_len = 600
+        else:
+            max_len = 800  # safe upper bound
+
+        result = summarizer(
+            chunk,
+            max_length=max_len,
+            min_length=int(max_len * 0.5),
+            do_sample=False,
+            truncation=True
+        )
+
+        partial_summaries.append(result[0]["summary_text"])
+
+    # 🔹 Combine all chunk summaries (NO SECOND COMPRESSION)
+    final_text = " ".join(partial_summaries).strip()
+
+    # 🔹 Student Notes Formatting
+    sentences = re.split(r'(?<=[.!?]) +', final_text)
+    sentences = [s.strip() for s in sentences if s.strip()]
+
+    paragraphs = []
+    temp = []
+
+    for s in sentences:
+        temp.append(s)
+        if len(temp) >= 4:
+            paragraphs.append(" ".join(temp))
+            temp = []
+
+    if temp:
+        paragraphs.append(" ".join(temp))
+
+    headings = [
+        "Overview",
+        "Main Concepts",
+        "Key Details",
+        "Important Insights",
+        "Conclusion"
+    ]
+
+    structured_output = ""
+
+    for i, para in enumerate(paragraphs):
+        if i < len(headings):
+            structured_output += f"\n\n{headings[i]}\n\n{para}"
+        else:
+            structured_output += f"\n\n{para}"
+    # 🔹 Extract Key Terms (NOT counted in summary ratio)
     key_terms = list(dict.fromkeys(
-        [w.strip(".,;:()") for w in output.split() if len(w) > 5]
-    ))[:15]
+        [w.strip(".,;:()").capitalize()
+         for w in final_text.split()
+        if len(w) > 6 and w.isalpha()]
+    ))[:12]
 
     return {
-        "short_summary": short_summary,
-        "bullets": bullets,
-        "detailed_explanation": output,
-        "key_terms": key_terms
+        "short_summary": paragraphs[0] if paragraphs else final_text[:200],
+        "bullets": [],
+        "detailed_explanation": structured_output.strip(),
+        "key_terms": []
     }
-
 
 # ---------------------------
 # textup view
 # ---------------------------
 def textup(request):
-    summary, error, warning = {}, "", ""
+    summary = {}
+    error = ""
+    warning = ""
+
     if request.method == "POST":
+
         input_text = ""
-        if request.FILES.get("file"):
-            uploaded_file = request.FILES["file"]
+        uploaded_file = request.FILES.get("file")
+        pasted_text = request.POST.get("content", "").strip()
+
+        # 1️⃣ FILE UPLOAD
+        if uploaded_file:
             fname = uploaded_file.name.lower()
-            if uploaded_file.size > 50 * 1024 * 1024:
-                error = "File too large. Please upload a smaller file (max 15 MB)."
+
+            if uploaded_file.size > 350 * 1024 * 1024:
+                error = "File too large. Maximum allowed size is 350 MB."
             else:
                 try:
                     if fname.endswith(".pdf"):
                         reader = PyPDF2.PdfReader(uploaded_file)
-                        input_text = "\n".join([page.extract_text() or "" for page in reader.pages])
+                        input_text = "\n".join(
+                            [page.extract_text() or "" for page in reader.pages]
+                        )
+
+                        # 🔥 OCR fallback for scanned PDF
+                        if not input_text.strip():
+                            from pdf2image import convert_from_bytes
+                            import pytesseract
+
+                            uploaded_file.seek(0)
+
+                            images = convert_from_bytes(
+                                uploaded_file.read(),
+                                poppler_path=r"C:\Program Files\poppler-25.12.0\Library\bin"
+                            )
+
+                            text_list = [
+                                pytesseract.image_to_string(img)
+                                for img in images
+                            ]
+
+                            input_text = "\n".join(text_list)
+
                     elif fname.endswith(".txt"):
                         input_text = uploaded_file.read().decode("utf-8", errors="ignore")
-                    elif fname.endswith(".docx"):
+
+                    elif fname.endswith((".docx", ".doc")):
                         doc = DocxReader(uploaded_file)
                         input_text = "\n".join([p.text for p in doc.paragraphs])
-                    else:
-                        error = "Unsupported file type. Please upload .txt, .pdf, or .docx."
-                except Exception as e:
-                    logger.error("File reading failed", exc_info=True)
-                    error = f"Error reading the file: {str(e)}"
-                if input_text and len(input_text) > 20000:
-                    warning = "This file is large. Processing may take some time."
-        elif request.POST.get("content"):
-            input_text = request.POST.get("content", "")
 
-        if input_text and input_text.strip() and not error:
-            if len(input_text) > MAX_PROCESS_CHARS:
-                input_text = input_text[:MAX_PROCESS_CHARS]
-                warning = "Input trimmed to first 200k characters for speed."
+                    elif fname.endswith(".pptx"):
+                        from pptx import Presentation
+                        prs = Presentation(uploaded_file)
+                        slides_text = []
+                        for slide in prs.slides:
+                            for shape in slide.shapes:
+                                if hasattr(shape, "text"):
+                                    slides_text.append(shape.text)
+                        input_text = "\n".join(slides_text)
+
+                    elif fname.endswith((".jpg", ".jpeg", ".png")):
+                        from PIL import Image
+                        import pytesseract
+                        image = Image.open(uploaded_file)
+                        input_text = pytesseract.image_to_string(image)
+
+                    else:
+                        error = "Unsupported file type."
+
+                except Exception as e:
+                    logger.exception("File reading failed")
+                    error = f"Error reading file: {str(e)}"
+
+        # 2️⃣ PASTED TEXT
+        elif pasted_text:
+            input_text = pasted_text
+
+        else:
+            error = "Please paste some text or upload a supported file."
+
+        
+        # 🔥 LIMIT TO 20,000 WORDS
+        
+        words = input_text.split()
+
+        if len(words) > MAX_WORDS:
+            input_text = " ".join(words[:MAX_WORDS])
+            warning = "Text trimmed to first 20,000 words for performance."
+
+        if translator_pipeline and input_text:
+            try:
+                translated = translator_pipeline(input_text, max_length=3000)
+                input_text = translated[0]["translation_text"]
+            except Exception:
+                logger.exception("Translation failed")
+        # 3️⃣ GENERATE SUMMARY
+        if input_text.strip() and not error:
             try:
                 summary_length = request.POST.get("summary_length", "medium")
                 notes = generate_fast_notes(input_text, summary_length)
+
                 request.session["latest_notes"] = notes
                 request.session.modified = True
+
                 summary = notes
-            except Exception:
+
+            except Exception as e:
                 logger.exception("Generation failed")
-                error = "Something went wrong while generating notes."
-        elif not error and (not input_text or not input_text.strip()):
-            error = "Please paste some text or upload a supported file."
-    return render(request, "textup.html", {"summary": summary, "error": error, "warning": warning})
+                error = str(e)
 
-
+    return render(request, "textup.html", {
+        "summary": summary,
+        "error": error,
+        "warning": warning
+    })
 # ---------------------------
 # audio upload / ASR
 # ---------------------------
@@ -352,6 +526,13 @@ def audio_upload(request):
             except Exception:
                 logger.exception("ASR pipeline failed")
                 transcript = ""
+                # 🔥 Force English translation
+            #if translator_pipeline and transcript:
+             #   try:
+              #      translated = translator_pipeline(transcript, max_length=3000)
+               #     transcript = translated[0]["translation_text"]
+                #except Exception:
+                 #   logger.exception("Translation failed")
 
         # fallback to speech_recognition + Google
         if not transcript and SR_AVAILABLE:
@@ -374,10 +555,29 @@ def audio_upload(request):
 
         if len(transcript) > MAX_PROCESS_CHARS:
             transcript = transcript[:MAX_PROCESS_CHARS]
+            import re
+
+            # remove repeated words like "safe safe safe"
+            transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', transcript)
+
+            # remove broken filler like "ya na ya na"
+            transcript = re.sub(r'\b(ya|na|uh|um|hmm)\b', '', transcript, flags=re.IGNORECASE)
+
+            # remove extra spaces
+            transcript = re.sub(r'\s+', ' ', transcript).strip()
 
         summary_length = request.POST.get("summary_length", "medium")
         try:
-            notes = generate_fast_notes(transcript, summary_length)
+            clean_input = f"""
+              The following is a transcript of an educational discussion.
+
+                Please create clear student-style structured notes.
+
+                Transcript:
+                {transcript}
+                """
+
+            notes = generate_fast_notes(clean_input, summary_length)
         except Exception:
             logger.exception("Note generation failed for audio transcript")
             try:
@@ -406,6 +606,98 @@ def audio_upload(request):
         except Exception:
             pass
         return JsonResponse({"success": False, "error": "Server error while processing audio."})
+
+
+
+# ---------------------------
+# video upload / ASR
+# ---------------------------
+@csrf_exempt
+def video_upload(request):
+    if request.method == "GET":
+        return render(request, "videoup.html")
+
+    tmp_video_path = None
+    tmp_audio_path = None
+
+    try:
+        if not request.FILES.get("file"):
+            return JsonResponse({"success": False, "error": "No video received."})
+
+        uploaded = request.FILES["file"]
+
+        # 🔹 Save video temporarily
+        suffix = os.path.splitext(uploaded.name)[1] or ".mp4"
+        tmp_video = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+        for chunk in uploaded.chunks():
+            tmp_video.write(chunk)
+        tmp_video.flush()
+        tmp_video.close()
+        tmp_video_path = tmp_video.name
+
+        # 🔹 Extract audio from video
+        from moviepy.editor import VideoFileClip
+
+        clip = VideoFileClip(tmp_video_path)
+
+        if clip.audio is None:
+            clip.close()
+            return JsonResponse({"success": False, "error": "No audio track found in video."})
+
+        tmp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+        tmp_audio_path = tmp_audio.name
+        tmp_audio.close()
+
+        clip.audio.write_audiofile(tmp_audio_path)
+        clip.close()
+
+        # 🔹 Transcription using existing ASR
+        transcript = ""
+
+        if asr_pipeline is not None:
+            try:
+                out = asr_pipeline(tmp_audio_path)
+                if isinstance(out, dict) and "text" in out:
+                    transcript = out["text"]
+                elif isinstance(out, list) and out and "text" in out[0]:
+                    transcript = out[0]["text"]
+            except Exception:
+                logger.exception("Video ASR failed")
+                transcript = ""
+
+        if not transcript:
+            return JsonResponse({"success": False, "error": "Transcription failed."})
+
+        if len(transcript) > MAX_PROCESS_CHARS:
+            transcript = transcript[:MAX_PROCESS_CHARS]
+
+        # 🔹 Generate summary
+        summary_length = request.POST.get("summary_length", "medium")
+        notes = generate_fast_notes(transcript, summary_length)
+
+        # 🔥 VERY IMPORTANT (for download buttons)
+        request.session["latest_notes"] = notes
+        request.session.modified = True
+
+        return JsonResponse({
+            "success": True,
+            "summary": notes,
+            "transcript": transcript
+        })
+
+    except Exception as e:
+        logger.exception("Video processing failed")
+        return JsonResponse({"success": False, "error": str(e)})
+
+    finally:
+        # 🔹 Cleanup temp files
+        for path in [tmp_video_path, tmp_audio_path]:
+            try:
+                if path and os.path.exists(path):
+                    os.unlink(path)
+            except Exception:
+                pass
+
 
 
 # ---------------------------
@@ -547,8 +839,7 @@ def delete_note(request, pk):
 # ---------------------------
 # small page renderers
 # ---------------------------
-def video_upload(request):
-    return render(request, "videoup.html")
+
 
 
 def qna_upload(request):

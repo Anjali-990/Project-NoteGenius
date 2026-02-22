@@ -93,3 +93,5 @@ EMAIL_HOST_USER = "notegenius9@gmail.com"            # <--- your real gmail addr
 EMAIL_HOST_PASSWORD = "qbru mtrh zvmi nlrj"     # <--- use Gmail App Password (not normal pwd)
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 400 * 1024 * 1024
+FILE_UPLOAD_MAX_MEMORY_SIZE = 400 * 1024 * 1024

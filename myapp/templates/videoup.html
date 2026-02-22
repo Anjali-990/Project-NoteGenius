@@ -9,9 +9,9 @@
       Upload your video or record a clip. Our AI will extract audio, convert it to text, and generate summarized notes.
     </p>
 
-    <form id="videoUploadForm">
+    <form id="videoUploadForm" enctype="multipart/form-data">
+      {% csrf_token %}
 
-      <!-- Drop Area -->
       <div class="drop-area text-center">
         <i class="fas fa-video"></i>
         <h6>Drag & Drop your video file here</h6>
@@ -19,6 +19,7 @@
 
         <input
           type="file"
+          name="file"
           class="form-control mt-2"
           accept="video/*,.mp4,.mkv,.mov"
           id="videoInput"
@@ -26,80 +27,141 @@
       </div>
       <br>
 
-      <!-- Record Video -->
-      <div class="my-3">
-        <label class="form-label fw-semibold text-secondary">
-          Or record a short video:
-        </label>
-
-        <div class="d-flex flex-wrap gap-2">
-          <button type="button" id="startVideoRecord" class="btn btn-outline-primary btn-sm">
-            <i class="fas fa-circle-dot me-2"></i> Start Recording
-          </button>
-
-          <button type="button" id="stopVideoRecord" class="btn btn-outline-danger btn-sm" disabled>
-            <i class="fas fa-square me-2" style="color: #dc3545 !important; opacity: 1 !important;"></i> 
-            <span style="color: #dc3545 !important; font-weight: bold; opacity: 1 !important;">Stop</span>
-          </button>
-        </div>
-
-        <video id="videoPreview" controls class="mt-3 w-100 d-none"></video>
-      </div>
-
       <button type="submit" class="generate-btn w-100">
         <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes
       </button>
     </form>
 
-    <div class="result-section d-none" id="videoResultSection">
-      <h5 class="mt-4">
-        <i class="fas fa-wand-magic-sparkles me-2"></i> Generated Notes:
-      </h5>
-      <p class="mt-2">• Extracted and summarized notes will appear here.</p>
+    <!-- RESULT SECTION -->
+    <div id="videoResultSection" class="d-none mt-4">
+
+      <!-- Processing -->
+      <div id="videoProcessing" class="text-center d-none">
+        <div class="spinner-border text-primary"></div>
+        <p class="mt-2">Processing your video... Please wait.</p>
+      </div>
+
+      <!-- Output -->
+      <div id="videoOutput" class="d-none">
+
+        <h5 class="mt-4">
+          <i class="fas fa-wand-magic-sparkles me-2"></i> Generated Notes:
+        </h5>
+
+        <div id="videoSummaryText"
+             class="summary-box mt-2 position-relative"
+             style="text-align: justify;">
+        </div>
+
+        <div class="mt-3">
+          <a href="{% url 'download_pdf' %}" class="btn btn-sm btn-danger">Download PDF</a>
+          <a href="{% url 'download_docx' %}" class="btn btn-sm btn-primary">Download DOCX</a>
+        </div>
+
+      </div>
     </div>
+
+    <div class="alert alert-danger mt-3 d-none" id="videoError"></div>
+
   </div>
 </section>
 
 <script>
-  // 🎥 Simple video recording (optional)
-  let videoRecorder;
-  let videoChunks = [];
+const form = document.getElementById("videoUploadForm");
+const resultSection = document.getElementById("videoResultSection");
+const processingDiv = document.getElementById("videoProcessing");
+const outputDiv = document.getElementById("videoOutput");
+const summaryText = document.getElementById("videoSummaryText");
+const errorBox = document.getElementById("videoError");
 
-  const startVideo = document.getElementById("startVideoRecord");
-  const stopVideo = document.getElementById("stopVideoRecord");
-  const preview = document.getElementById("videoPreview");
+form.addEventListener("submit", async function(e) {
+  e.preventDefault();
 
-  startVideo.addEventListener("click", async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-    videoRecorder = new MediaRecorder(stream);
+  const fileInput = document.getElementById("videoInput");
 
-    videoChunks = [];
-    videoRecorder.start();
+  if (!fileInput.files.length) {
+    alert("Please select a video file.");
+    return;
+  }
 
-    startVideo.disabled = true;
-    stopVideo.disabled = false;
+  const submitBtn = form.querySelector("button[type='submit']");
+  submitBtn.disabled = true;
+  submitBtn.innerHTML =
+    '<span class="spinner-border spinner-border-sm me-2"></span> Processing...';
 
-    videoRecorder.ondataavailable = (e) => {
-      videoChunks.push(e.data);
-    };
-  });
+  const formData = new FormData();
+  formData.append("file", fileInput.files[0]);
 
-  stopVideo.addEventListener("click", () => {
-    videoRecorder.stop();
+  // 🔥 Important Fix — no white box
+  processingDiv.classList.remove("d-none");
+  outputDiv.classList.add("d-none");
+  errorBox.classList.add("d-none");
 
-    stopVideo.disabled = true;
-    startVideo.disabled = false;
+  try {
+    const response = await fetch("{% url 'video_upload' %}", {
+      method: "POST",
+      body: formData,
+      headers: {
+        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value
+      }
+    });
 
-    videoRecorder.onstop = () => {
-      const videoBlob = new Blob(videoChunks, { type: "video/mp4" });
-      const url = URL.createObjectURL(videoBlob);
+    const data = await response.json();
 
-      preview.src = url;
-      preview.classList.remove("d-none");
+    processingDiv.classList.add("d-none");
+    resultSection.classList.remove("d-none");
 
-      // Optional: send videoBlob to backend
-    };
-  });
+    if (data.success) {
+      outputDiv.classList.remove("d-none");
+
+      summaryText.innerHTML = `
+        <h6>⭐ Short Summary</h6>
+        <p>${data.summary.short_summary}</p>
+
+        <h6>⭐ Bullet Points</h6>
+        <ul>
+          ${data.summary.bullets.map(b => `<li>${b}</li>`).join("")}
+        </ul>
+
+        <h6>⭐ Detailed Explanation</h6>
+        <p>${data.summary.detailed_explanation}</p>
+      `;
+
+      // Copy Button
+      if (!summaryText.querySelector(".copy-btn")) {
+        const btn = document.createElement("button");
+        btn.innerHTML = '<i class="fas fa-copy"></i>';
+        btn.className = "btn btn-sm btn-outline-light copy-btn";
+        btn.style.position = "absolute";
+        btn.style.top = "5px";
+        btn.style.right = "5px";
+
+        btn.addEventListener("click", function () {
+          navigator.clipboard.writeText(summaryText.innerText);
+          btn.innerHTML = "✔";
+          setTimeout(() => {
+            btn.innerHTML = '<i class="fas fa-copy"></i>';
+          }, 1500);
+        });
+
+        summaryText.prepend(btn);
+      }
+
+    } else {
+      errorBox.innerText = data.error;
+      errorBox.classList.remove("d-none");
+    }
+
+  } catch (err) {
+    processingDiv.classList.add("d-none");
+    errorBox.innerText = "Server error while processing video.";
+    errorBox.classList.remove("d-none");
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML =
+      '<i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes';
+  }
+});
 </script>
 
 {% endblock %}
