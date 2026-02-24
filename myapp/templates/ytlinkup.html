@@ -1,0 +1,99 @@
+
+{% extends "index.html" %}
+{% block main %}
+
+<div class="container upload-section">
+  <div class="upload-card">
+    <h3 class="mb-2">Generate Notes from Video Link</h3>
+    <p class="text-muted">
+      Paste a YouTube or public video link. Our AI will transcribe and generate structured notes.
+    </p>
+
+    <form id="ytForm">
+      {% csrf_token %}
+
+      <div class="my-3">
+        <input
+          type="text"
+          class="form-control"
+          id="video_url"
+          placeholder="Paste video link here..."
+          required
+        />
+      </div>
+
+      <button id="generateBtn" class="generate-btn w-100" type="submit">
+        <i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes
+      </button>
+    </form>
+
+    <div id="responseArea" class="mt-4"></div>
+  </div>
+</div>
+
+<script>
+document.getElementById("ytForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const btn = document.getElementById("generateBtn");
+    const url = document.getElementById("video_url").value;
+    const responseArea = document.getElementById("responseArea");
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+
+    fetch("{% url 'video_link' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({
+            video_url: url,
+            summary_length: "long" // <-- Changed this to "long" to get maximum detail
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes';
+
+        if (!data.success) {
+            responseArea.innerHTML =
+                `<div class="alert alert-danger">${data.error}</div>`;
+            return;
+        }
+
+        // Generate badges for key terms
+        let keyTermsHtml = '';
+        if (data.summary.key_terms && data.summary.key_terms.length > 0) {
+            keyTermsHtml = data.summary.key_terms.map(term => 
+                `<span class="badge bg-secondary me-1 mb-1 p-2">${term}</span>`
+            ).join('');
+        }
+
+        // 🔥 FIX: Now displaying ALL sections of the notes
+        responseArea.innerHTML = `
+            <div class="summary-box mt-4 p-4 bg-dark text-light rounded shadow text-start">
+                <h4 class="border-bottom border-secondary pb-2 mb-3 text-primary">Your Generated Notes</h4>
+                
+                <h5 class="text-info">Short Summary</h5>
+                <p class="mb-4">${data.summary.short_summary}</p>
+                
+                <h5 class="text-info">Detailed Explanation</h5>
+                <div class="mb-4" style="white-space: pre-wrap; line-height: 1.6;">${data.summary.detailed_explanation}</div>
+                
+                <h5 class="text-info">Key Terms</h5>
+                <div>${keyTermsHtml}</div>
+            </div>
+        `;
+    })
+    .catch(error => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-wand-magic-sparkles me-2"></i> Generate Notes';
+        responseArea.innerHTML = `<div class="alert alert-danger">An error occurred while communicating with the server.</div>`;
+    });
+});
+</script>
+
+{% endblock %}

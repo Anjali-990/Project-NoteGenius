@@ -2,7 +2,7 @@
 from django.contrib import admin
 from django.urls import path
 from myapp import views
-
+from myapp.views import yt_link_page, yt_link_upload
 urlpatterns = [
     path('admin/', admin.site.urls),
 
@@ -38,4 +38,6 @@ urlpatterns = [
 
     # OTP (send OTP for login / signup)
     path('send-login-otp/', views.send_login_otp, name='send_login_otp'),
+   path("ytlink/", views.yt_link_page, name="yt_link_page"),
+path("ytlink/upload/", views.yt_link_upload, name="video_link"),
 ]

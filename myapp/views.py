@@ -23,6 +23,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
 from django.core.mail import send_mail
 from django.utils import timezone
+from transformers import pipeline
 
 # models
 from .models import Profile, EmailOTP, Notes
@@ -34,6 +35,7 @@ from docx import Document as DocxWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+
 
 import pytesseract
 
@@ -48,7 +50,6 @@ except Exception:
 
 # transformers summarizer / asr
 import torch
-from transformers import pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -254,30 +255,34 @@ def chunk_text_dynamic(text):
 
 def generate_fast_notes(text, summary_length="medium"):
 
-    # 🔥 Hinglish detection & conversion
+    if not summarizer:
+        raise Exception("Summarizer model not loaded.")
+
     import re
-    # 🔥 Clean repeated junk words
-    transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', text)
-    # remove weird broken fragments
-    transcript = re.sub(r'[^\x00-\x7F]+', ' ', transcript)
-    # remove multiple spaces
-    transcript = re.sub(r'\s+', ' ', transcript).strip()
-    hinglish_words = re.findall(r"\b(hai|tha|thi|kya|kaise|kyun|aur|lekin|matlab|krna|hona)\b", transcript.lower())
 
-    if len(hinglish_words) > 5:
+    # 🔹 Clean junk
+    text = re.sub(r'\b(\w+)( \1\b)+', r'\1', text)
+    text = re.sub(r'[^\x00-\x7F]+', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+
+    # 🔹 Hinglish detection
+    hinglish_words = re.findall(
+        r"\b(hai|tha|thi|kya|kaise|kyun|aur|lekin|matlab|krna|hona)\b",
+        text.lower()
+    )
+
+    # 🔹 Translate to English if needed
+    if translator_pipeline and len(hinglish_words) > 5:
         try:
-            text = translator.translate(text, dest="en").text
+            translated = translator_pipeline(text, max_length=3000)
+            text = translated[0]["translation_text"]
         except:
-            pass
-
+            print("⚠ Translation failed")
 
     words = text.split()
     total_words = len(words)
 
-    # 🔹 Desired summary ratio (approx 26%)
-    target_summary_words = int(total_words * 0.26)
-
-    # 🔹 Safe chunk size for distilbart
+    # 🔹 26% ratio
     max_chunk_words = 900
     chunks = []
 
@@ -289,11 +294,8 @@ def generate_fast_notes(text, summary_length="medium"):
 
     for chunk in chunks:
         chunk_word_count = len(chunk.split())
-
-        # ratio for each chunk
         chunk_target = int(chunk_word_count * 0.26)
 
-        # safety bounds
         if chunk_target < 120:
             max_len = 150
         elif chunk_target < 300:
@@ -301,7 +303,7 @@ def generate_fast_notes(text, summary_length="medium"):
         elif chunk_target < 600:
             max_len = 600
         else:
-            max_len = 800  # safe upper bound
+            max_len = 800
 
         result = summarizer(
             chunk,
@@ -313,55 +315,70 @@ def generate_fast_notes(text, summary_length="medium"):
 
         partial_summaries.append(result[0]["summary_text"])
 
-    # 🔹 Combine all chunk summaries (NO SECOND COMPRESSION)
     final_text = " ".join(partial_summaries).strip()
 
-    # 🔹 Student Notes Formatting
+    # 🔹 Sentence split
     sentences = re.split(r'(?<=[.!?]) +', final_text)
-    sentences = [s.strip() for s in sentences if s.strip()]
+    sentences = [s.strip() for s in sentences if len(s.split()) > 5]
 
-    paragraphs = []
+    # 🔹 Introduction (first 2 sentences)
+    introduction = " ".join(sentences[:2])
+
+    # 🔹 Conclusion (last 2 sentences)
+    conclusion = " ".join(sentences[-2:])
+
+    # 🔹 Important Bullet Points (long impactful sentences)
+    important_bullets = [
+        s for s in sentences
+        if len(s.split()) > 18
+    ][:8]
+
+    # 🔹 Main Body (excluding intro + conclusion)
+    body_sentences = sentences[2:-2]
+
+    # Group body into logical sections
+    sections = []
     temp = []
 
-    for s in sentences:
+    for s in body_sentences:
         temp.append(s)
         if len(temp) >= 4:
-            paragraphs.append(" ".join(temp))
+            sections.append(" ".join(temp))
             temp = []
 
     if temp:
-        paragraphs.append(" ".join(temp))
-
-    headings = [
-        "Overview",
-        "Main Concepts",
-        "Key Details",
-        "Important Insights",
-        "Conclusion"
-    ]
+        sections.append(" ".join(temp))
 
     structured_output = ""
 
-    for i, para in enumerate(paragraphs):
-        if i < len(headings):
-            structured_output += f"\n\n{headings[i]}\n\n{para}"
-        else:
-            structured_output += f"\n\n{para}"
-    # 🔹 Extract Key Terms (NOT counted in summary ratio)
+    # Introduction
+    structured_output += "\n\nIntroduction\n\n" + introduction
+
+    # Main Sections
+    for i, section in enumerate(sections):
+        structured_output += f"\n\nMain Topic {i+1}\n\n{section}"
+
+    # Important Points Section
+    structured_output += "\n\nImportant Points\n"
+    for b in important_bullets:
+        structured_output += f"\n• {b}"
+
+    # Conclusion
+    structured_output += "\n\nConclusion\n\n" + conclusion
+
+    # 🔹 Key Terms (not counted in ratio)
     key_terms = list(dict.fromkeys(
         [w.strip(".,;:()").capitalize()
          for w in final_text.split()
-        if len(w) > 6 and w.isalpha()]
+         if len(w) > 6 and w.isalpha()]
     ))[:12]
 
     return {
-        "short_summary": paragraphs[0] if paragraphs else final_text[:200],
-        "bullets": [],
+        "short_summary": introduction,
+        "bullets": important_bullets,
         "detailed_explanation": structured_output.strip(),
-        "key_terms": []
+        "key_terms": key_terms
     }
-
-# ---------------------------
 # textup view
 # ---------------------------
 def textup(request):
@@ -454,7 +471,7 @@ def textup(request):
             input_text = " ".join(words[:MAX_WORDS])
             warning = "Text trimmed to first 20,000 words for performance."
 
-        if translator_pipeline and input_text:
+        if translator_pipeline and input_text and len(input_text) < 3000:
             try:
                 translated = translator_pipeline(input_text, max_length=3000)
                 input_text = translated[0]["translation_text"]
@@ -698,9 +715,74 @@ def video_upload(request):
             except Exception:
                 pass
 
+#yt linkupload
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from youtube_transcript_api import YouTubeTranscriptApi
+from django.shortcuts import render
 
 
-# ---------------------------
+@csrf_exempt
+def yt_link_upload(request):
+    if request.method != "POST":
+        return JsonResponse({"success": False, "error": "Only POST allowed."})
+
+    video_url = request.POST.get("video_url")
+
+    if not video_url:
+        return JsonResponse({"success": False, "error": "No URL provided."})
+
+    try:
+        # 🔹 Extract video ID
+        if "v=" in video_url:
+            video_id = video_url.split("v=")[1].split("&")[0]
+        elif "youtu.be/" in video_url:
+            video_id = video_url.split("youtu.be/")[1].split("?")[0]
+        else:
+            return JsonResponse({"success": False, "error": "Invalid YouTube URL."})
+
+        # 🔹 Get transcript (CORRECT WAY)
+        from youtube_transcript_api import YouTubeTranscriptApi
+        ytt_api = YouTubeTranscriptApi()
+        transcript = ytt_api.fetch(video_id)
+        full_text = " ".join([item.text for item in transcript])
+
+        if not full_text.strip():
+            return JsonResponse({
+                "success": False,
+                "error": "Transcript not available for this video."
+            })
+
+        # 🔹 Limit words (same logic like text upload)
+        words = full_text.split()
+        MAX_WORDS = 20000
+        if len(words) > MAX_WORDS:
+            full_text = " ".join(words[:MAX_WORDS])
+
+        # 🔹 Use your EXISTING summarizer function
+        notes = generate_fast_notes(full_text, "medium")
+
+        # 🔹 Save in session
+        request.session["latest_notes"] = notes
+        request.session.modified = True
+
+        return JsonResponse({
+            "success": True,
+            "summary": notes
+        })
+
+    except Exception as e:
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
+
+
+def yt_link_page(request):
+    return render(request, "ytlinkup.html")
+#-------------------------------------
+
+#-----------------
 # downloads (read from session latest_notes)
 # ---------------------------
 def download_pdf(request):
