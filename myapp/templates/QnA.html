@@ -1,0 +1,215 @@
+{% extends "index.html" %}
+{% load static %}
+{% block main %}
+
+<section class="container upload-section">
+  <div class="container">
+    <div class="upload-card">
+      <h3 class="mb-2 text-center">Upload to Generate Question and Answers</h3>
+      <p class="text-center text-muted px-2">
+        Upload a file or paste text. AI will generate direct QnA (no summary).
+      </p>
+
+      <!-- QnA Upload Form -->
+      <form id="qnaUploadForm" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- File Upload -->
+        <div class="drop-area mt-3">
+          <i class="fas fa-file-circle-question"></i>
+          <h6 class="mt-2">Upload your file</h6>
+          <p class="text-muted small">
+            Supports PDF, DOCX, TXT
+          </p>
+
+          <input
+            type="file"
+            class="form-control mt-2"
+            id="qnaFileInput"
+            name="file"
+            accept=".pdf,.docx,.txt"
+          />
+        </div>
+
+        <!-- Text input -->
+        <div class="my-3 text-start">
+          <label class="form-label fw-semibold text-secondary">
+            Or paste your text below:
+          </label>
+
+          <textarea
+            class="form-control"
+            id="qnaTextInput"
+            name="text"
+            rows="6"
+            placeholder="Paste your content here..."
+          ></textarea>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="generate-btn w-100">
+          <i class="fas fa-wand-magic-sparkles me-2"></i>
+          Generate QnA
+        </button>
+      </form>
+
+      <!-- Result Section -->
+      <div class="result-section d-none" id="qnaResultSection" style="background-color: #071229; ">
+        <h5 class="mt-4">
+          <i class="fas fa-circle-question me-2"></i>
+          Generated QnA:
+        </h5>
+
+        <div id="qnaOutput" class="mt-4 p-3 bg-dark text-light rounded shadow" style="text-align: justify; background-color: #071229;"></div>
+
+        <button
+          type="button"
+          id="downloadPdfBtn"
+          class="btn btn-outline-secondary mt-3 w-100"
+          disabled
+        >
+          <i class="fas fa-download me-2"></i>
+          Download QnA as PDF
+        </button>
+        <button id="saveQnaBtn" class="btn btn-success mt-3 w-100">
+        Save to My Notes
+        </button>
+      </div>
+
+      <!-- Doubt Clear Section -->
+      <div class="mt-4">
+        <h5>
+          <i class="fas fa-comments me-2"></i>
+          Doubt Clear
+        </h5>
+
+        <form id="doubtForm">
+          {% csrf_token %}
+          <input
+            type="text"
+            id="doubtInput"
+            class="form-control"
+            placeholder="Ask your doubt from generated content..."
+          />
+          <button type="submit" class="btn btn-primary mt-2 w-100">
+            Ask
+          </button>
+        </form>
+
+        <div id="doubtAnswer" class="mt-3"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  const qnaForm = document.getElementById("qnaUploadForm");
+  const resultSection = document.getElementById("qnaResultSection");
+  const downloadBtn = document.getElementById("downloadPdfBtn");
+  const qnaOutput = document.getElementById("qnaOutput");
+  const doubtForm = document.getElementById("doubtForm");
+  const doubtAnswerDiv = document.getElementById("doubtAnswer");
+  const saveBtn = document.getElementById("saveQnaBtn");
+
+
+  // ----------------------
+  // Generate QnA
+  // ----------------------
+  qnaForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const generateBtn = qnaForm.querySelector("button[type='submit']");
+    generateBtn.disabled = true;
+    generateBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+
+    const formData = new FormData(qnaForm);
+
+    resultSection.classList.remove("d-none");
+    qnaOutput.innerHTML = "Generating QnA... Please wait ⏳";
+
+    const response = await fetch("{% url 'qna_upload' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    qnaOutput.innerHTML =
+      `<div class="qna-box">${data.qna.replace(/\n/g, "<br>")}</div>`;
+  
+    generateBtn.disabled = false;
+    generateBtn.innerHTML = '<i class="fas fa-wand-magic-sparkles me-2"></i> Generate QnA';
+    downloadBtn.disabled = false;
+  });
+
+
+  // ----------------------
+  // Save QnA
+  // ----------------------
+  saveBtn.addEventListener("click", async function () {
+
+    const formData = new FormData();
+    formData.append("save_qna", "1");
+
+    const response = await fetch("{% url 'qna_upload' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}"
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+
+    if (data.status === "saved") {
+      alert("QnA saved successfully!");
+    } else {
+      alert("Login required or error occurred.");
+    }
+  });
+
+
+  // ----------------------
+  // Doubt Clear
+  // ----------------------
+  doubtForm.addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const doubtText = document.getElementById("doubtInput").value.trim();
+    if (!doubtText) return;
+
+    const formData = new FormData();
+    formData.append("doubt", doubtText);
+
+    doubtAnswerDiv.innerHTML = "Thinking... 🤔";
+
+    const response = await fetch("{% url 'qna_upload' %}", {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+      },
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    doubtAnswerDiv.innerHTML =
+      `<div class="p-3 border rounded bg-dark text-white">
+        <strong>Answer:</strong><br>${data.doubt_answer.replace(/\n/g, "<br>")}
+      </div>`;
+  });
+
+
+  downloadBtn.addEventListener("click", function () {
+    alert("PDF download can be implemented after backend PDF generation.");
+  });
+
+});
+</script>
+
+{% endblock %}

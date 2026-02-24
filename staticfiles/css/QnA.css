@@ -18,7 +18,7 @@
 
 .drop-area:hover {
   border-color: #2f9adf;
-  background: #f3eafe;
+  background: #071229;
 }
 
 .drop-area i {
@@ -44,9 +44,11 @@
 /* Result box */
 .result-section {
   margin-top: 25px;
-  background: #f9f7ff;
   padding: 18px;
   border-radius: 15px;
+  background: #071229;
+  color: #071229 ;
+  
 }
 
 /* Responsive */

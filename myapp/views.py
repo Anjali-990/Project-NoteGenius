@@ -35,7 +35,7 @@ from docx import Document as DocxWriter
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
-
+import fitz
 
 import pytesseract
 
@@ -59,10 +59,12 @@ translator_pipeline = None
 
 device = 0 if torch.cuda.is_available() else -1
 
+qna_model = pipeline("text2text-generation", model="google/flan-t5-base", framework="pt", device=0)
+
 try:
     summarizer = pipeline(
         "summarization",
-        model="sshleifer/distilbart-cnn-6-6",
+        model="sshleifer/distilbart-cnn-12-6",
         device=device
     )
     print("✅ Summarizer loaded successfully")
@@ -919,17 +921,173 @@ def delete_note(request, pk):
 
 
 # ---------------------------
-# small page renderers
+# QnA page
 # ---------------------------
 
+from transformers import pipeline
+from django.http import JsonResponse
+from django.shortcuts import render
+from .models import Notes   # 👈 make sure your saved notes model name is correct
 
+qna_model = pipeline(
+    "text2text-generation",
+    model="google/flan-t5-base",   # base use kar rahe hain
+    device=0  # GPU (since you have RTX 3050)
+)
+
+
+# ---------------------------
+# Helper: Extract Text
+# ---------------------------
+
+def extract_text(file):
+    if file.name.endswith(".pdf"):
+        text = ""
+        pdf = fitz.open(stream=file.read(), filetype="pdf")
+        for page in pdf:
+            text += page.get_text()
+        return text
+
+    elif file.name.endswith(".docx"):
+        doc = docx.Document(file)
+        return "\n".join([para.text for para in doc.paragraphs])
+
+    elif file.name.endswith(".txt"):
+        return file.read().decode("utf-8")
+
+    return ""
+
+
+# ---------------------------
+# Helper: Chunking (Reduced to 1500 for model memory limits)
+# ---------------------------
+
+def split_into_chunks(text, chunk_size=1500):
+    return [text[i:i + chunk_size] for i in range(0, len(text), chunk_size)]
+
+
+# ---------------------------
+# Context storage (for doubts)
+# ---------------------------
+
+stored_context = ""
+last_generated_qna = ""
+
+
+# ---------------------------
+# Main View
+# ---------------------------
 
 def qna_upload(request):
-    return render(request, "QnAup.html")
+    global stored_context, last_generated_qna
 
+    if request.method == "GET":
+        return render(request, "QnA.html")
+
+    if request.method == "POST":
+
+        # --------------------
+        # 1️⃣ SAVE TO NOTES (Untouched)
+        # --------------------
+        if "save_qna" in request.POST:
+            if last_generated_qna and request.user.is_authenticated:
+                Notes.objects.create(
+                    user=request.user,
+                    title="QnA Notes",
+                    content=last_generated_qna
+                )
+                return JsonResponse({"status": "saved"})
+            return JsonResponse({"status": "error"})
+
+
+        # --------------------
+        # 2️⃣ DOUBT CLEAR (Untouched as requested)
+        # --------------------
+        if "doubt" in request.POST:
+            doubt_text = request.POST.get("doubt")
+
+            if stored_context and doubt_text:
+                prompt = f"""
+Answer strictly using ONLY the original document below.
+
+If the answer is not present, say:
+"The answer is not available in the provided document."
+
+Original Document:
+{stored_context}
+
+Question:
+{doubt_text}
+
+Provide a clear explanation.
+"""
+
+                result = qna_model(prompt, max_length=700, do_sample=False)
+
+                return JsonResponse({
+                    "doubt_answer": result[0]["generated_text"]
+                })
+
+            return JsonResponse({
+                "doubt_answer": "No document context available."
+            })
+
+
+        # --------------------
+        # 3️⃣ QnA GENERATION (Fixed Loop & Prompt)
+        # --------------------
+        # --------------------
+        # 3️⃣ QnA GENERATION (T5-Optimized)
+        # --------------------
+        uploaded_file = request.FILES.get("file")
+        text_input = request.POST.get("text")
+        content = extract_text(uploaded_file) if uploaded_file else text_input
+
+        if content:
+            stored_context = content
+            # We use smaller chunks (1000 chars) to ensure the model focuses
+            chunks = split_into_chunks(content, chunk_size=1000) 
+            
+            all_qna = ""
+            count = 1
+
+            for chunk in chunks:
+                if count > 12: break # Stop once we hit your limit
+                
+                # We use a very "Forceful" prompt that T5 understands
+                # T5-base responds best to: "question: [text] answer: [text]" patterns
+                prompt = f"Using this text, generate a question and a detailed answer. Text: {chunk}"
+
+                result = qna_model(
+                    prompt, 
+                    max_length=400, 
+                    min_length=30,
+                    do_sample=True,
+                    temperature=0.7,
+                    repetition_penalty=1.2
+                )
+
+                generated_text = result[0]["generated_text"]
+                
+                # T5 often merges Q and A. We clean it up for your UI
+                # Most T5 outputs look like: "question: what is AI? answer: AI is..."
+                cleaned_output = generated_text.replace("question:", f"Q{count}:").replace("answer:", "\nAnswer:")
+                
+                # If the model didn't include "Q:" or "Answer:", we force the format
+                if "Q" not in cleaned_output:
+                    cleaned_output = f"Q{count}: " + cleaned_output.replace("?", "?\nAnswer: ")
+
+                all_qna += cleaned_output + "\n\n---\n\n"
+                count += 1
+
+            last_generated_qna = all_qna
+
+            return JsonResponse({"qna": all_qna})
+
+        return JsonResponse({"qna": "No valid content provided."})
 
 def quiz_upload(request):
-    return render(request, "Quizup.html")
+    return render(request, "Quiz.html")
 
 
 def profile(request):
