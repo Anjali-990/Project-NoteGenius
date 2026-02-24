@@ -91,3 +91,30 @@
     padding: 20px 12px;
   }
 }
+
+.notes-eval-container {
+  display: flex;
+  gap: 40px;
+  margin-top: 25px;
+  align-items: flex-start;
+}
+
+.notes-section {
+  flex: 3;
+}
+
+.evaluation-section {
+  flex: 1;
+}
+
+.evaluation-box {
+  background: #2a3642;
+  color: #ffffff;
+  min-width: 260px;
+}
+
+@media (max-width: 992px) {
+  .notes-eval-container {
+    flex-direction: column;
+  }
+}

@@ -3,6 +3,7 @@
 
 <div class="container upload-section">
   <div class="upload-card">
+
     <h3 class="mb-2">Upload Text to Generate Notes</h3>
     <p class="text-muted">
       Paste your content or upload a text file. Our AI assistant will summarize
@@ -17,12 +18,14 @@
         <i class="fas fa-cloud-arrow-up upload-icon"></i>
         <h6 class="mt-2">Drag & Drop your text file here</h6>
         <p class="text-muted small">or click below to choose a file</p>
-        <input type="file" class="form-control mt-2" id="fileInput" name="file" />
+        <input type="file" class="form-control mt-2" name="file" />
       </div>
 
       <!-- TEXT AREA -->
       <div class="my-3">
-        <label class="form-label fw-semibold text-secondary">Or paste your text below:</label>
+        <label class="form-label fw-semibold text-secondary">
+          Or paste your text below:
+        </label>
         <textarea
           class="form-control"
           rows="6"
@@ -37,33 +40,36 @@
       </button>
     </form>
 
-    <!-- SHOW WARNING -->
+    <!-- WARNING -->
     {% if warning %}
     <div class="mt-3 p-3 bg-warning text-dark rounded">
-      <p>{{ warning }}</p>
+      {{ warning }}
     </div>
     {% endif %}
 
-    <!-- SHOW ERROR -->
+    <!-- ERROR -->
     {% if error %}
     <div class="mt-3 p-3 bg-danger text-white rounded">
-      <p>{{ error }}</p>
+      {{ error }}
     </div>
     {% endif %}
 
-    <!-- SHOW STRUCTURED SUMMARY -->
+    <!-- SUMMARY + EVALUATION -->
     {% if summary %}
-    <div class="summary-box mt-4 p-3 bg-dark text-light rounded shadow" style="text-align: justify;">
+<div class="notes-eval-container">
+
+  <!-- LEFT SIDE -->
+  <div class="notes-section">
+
+    <div class="summary-box p-3 bg-dark text-light rounded shadow" style="text-align: justify;">
 
       <h5 class="mb-3">Your Generated Notes</h5>
 
-      <!-- Short Summary -->
       <div class="mb-3">
         <h6>⭐ Short Summary</h6>
         <p>{{ summary.short_summary }}</p>
       </div>
 
-      <!-- Bullet Points -->
       <div class="mb-3">
         <h6>⭐ Bullet Points</h6>
         <ul>
@@ -75,44 +81,56 @@
         </ul>
       </div>
 
-      <!-- Detailed Explanation -->
       <div class="mb-3">
         <h6>⭐ Detailed Explanation</h6>
         <p>{{ summary.detailed_explanation }}</p>
       </div>
 
-      <!-- Key Terms (Comma Format) -->
       <div class="mb-3">
         <h6>⭐ Key Terms</h6>
         <p>{{ summary.key_terms|join:", " }}</p>
       </div>
 
-      <!-- Export Buttons -->
       <div class="d-flex gap-2 mt-3">
-        <a href="{% url 'download_pdf' %}" class="btn btn-primary w-50">
-          <i class="fas fa-file-pdf me-1"></i> Export as PDF
-        </a>
-        <a href="{% url 'download_docx' %}" class="btn btn-outline-primary w-50">
-          <i class="fas fa-file-word me-1"></i> Export as Word
-        </a>
+        <a href="{% url 'download_pdf' %}" class="btn btn-primary w-50">Export as PDF</a>
+        <a href="{% url 'download_docx' %}" class="btn btn-outline-primary w-50">Export as Word</a>
       </div>
 
-      <!-- SAVE BUTTON -->
       <form action="{% url 'save_notes' %}" method="POST" class="mt-3">
         {% csrf_token %}
         <input type="hidden" name="notes_data" value="{{ summary.detailed_explanation|escape }}" />
         <input type="hidden" name="note_type" value="text" />
         <input type="hidden" name="title" value="{{ summary.short_summary|truncatechars:60 }}" />
-        <button class="btn btn-success w-100">💾 Save Notes in Website</button>
+        <button class="btn btn-success w-100">💾 Save Notes</button>
       </form>
 
     </div>
-    {% endif %}
 
+  </div>
+
+  <!-- RIGHT SIDE -->
+  {% if evaluation %}
+  <div class="evaluation-section">
+
+    <div class="evaluation-box p-3 rounded shadow">
+
+      <h6 class="mb-3">📊 Evaluation Criteria</h6>
+
+      <p><strong>ROUGE-1:</strong> {{ evaluation.rouge1 }}%</p>
+      <p><strong>ROUGE-L:</strong> {{ evaluation.rougeL }}%</p>
+      <p><strong>Compression Ratio:</strong> {{ evaluation.compression }}%</p>
+
+    </div>
+
+  </div>
+  {% endif %}
+
+</div>
+{% endif %}
   </div>
 </div>
 
-<!-- ✅ Processing Spinner Script -->
+<!-- PROCESSING SPINNER -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
 
@@ -122,12 +140,11 @@ document.addEventListener("DOMContentLoaded", function() {
   if (!form || !btn) return;
 
   form.addEventListener("submit", function() {
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Processing...';
   });
 
 });
 </script>
 
 {% endblock %}
-

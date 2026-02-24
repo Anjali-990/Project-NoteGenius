@@ -6,6 +6,7 @@ import random
 import re
 import tempfile
 import logging
+from urllib import request
 from pydub import AudioSegment
 AudioSegment.converter = "ffmpeg"
 AudioSegment.ffprobe = "ffprobe"
@@ -24,6 +25,7 @@ from django.db.models import Q
 from django.core.mail import send_mail
 from django.utils import timezone
 from transformers import pipeline
+from rouge_score import rouge_scorer
 
 # models
 from .models import Profile, EmailOTP, Notes
@@ -107,6 +109,8 @@ MAX_PROCESS_CHARS = 200000
 # ---------------------------
 # AUTH / PAGES
 # ---------------------------
+
+
 def home(request):
     return render(request, "home.html")
 
@@ -235,6 +239,31 @@ def send_login_otp(request):
         return JsonResponse({"success": False, "message": "Error sending OTP email. Check email settings."})
 
     return JsonResponse({"success": True, "message": f"OTP has been sent to {recipient}"})
+
+# ---------------------------
+#evaluate_summary
+# ---------------------------
+def evaluate_summary(original_text, generated_text):
+
+    scorer = rouge_scorer.RougeScorer(['rouge1', 'rougeL'], use_stemmer=True)
+
+    scores = scorer.score(original_text, generated_text)
+
+    rouge1 = round(scores['rouge1'].fmeasure * 100, 2)
+    rougeL = round(scores['rougeL'].fmeasure * 100, 2)
+
+    original_words = len(original_text.split())
+    summary_words = len(generated_text.split())
+
+    compression_ratio = round((summary_words / original_words) * 100, 2) if original_words > 0 else 0
+
+    return {
+        "rouge1": rouge1,
+        "rougeL": rougeL,
+        "compression": compression_ratio
+    }
+
+
 # ---------------------------
 # TEXT summarization helpers
 # ---------------------------
@@ -360,10 +389,6 @@ def generate_fast_notes(text, summary_length="medium"):
     for i, section in enumerate(sections):
         structured_output += f"\n\nMain Topic {i+1}\n\n{section}"
 
-    # Important Points Section
-    structured_output += "\n\nImportant Points\n"
-    for b in important_bullets:
-        structured_output += f"\n• {b}"
 
     # Conclusion
     structured_output += "\n\nConclusion\n\n" + conclusion
@@ -387,10 +412,11 @@ def textup(request):
     summary = {}
     error = ""
     warning = ""
+    evaluation = {}
+    input_text = ""
 
     if request.method == "POST":
 
-        input_text = ""
         uploaded_file = request.FILES.get("file")
         pasted_text = request.POST.get("content", "").strip()
 
@@ -408,47 +434,12 @@ def textup(request):
                             [page.extract_text() or "" for page in reader.pages]
                         )
 
-                        # 🔥 OCR fallback for scanned PDF
-                        if not input_text.strip():
-                            from pdf2image import convert_from_bytes
-                            import pytesseract
-
-                            uploaded_file.seek(0)
-
-                            images = convert_from_bytes(
-                                uploaded_file.read(),
-                                poppler_path=r"C:\Program Files\poppler-25.12.0\Library\bin"
-                            )
-
-                            text_list = [
-                                pytesseract.image_to_string(img)
-                                for img in images
-                            ]
-
-                            input_text = "\n".join(text_list)
-
                     elif fname.endswith(".txt"):
                         input_text = uploaded_file.read().decode("utf-8", errors="ignore")
 
                     elif fname.endswith((".docx", ".doc")):
                         doc = DocxReader(uploaded_file)
                         input_text = "\n".join([p.text for p in doc.paragraphs])
-
-                    elif fname.endswith(".pptx"):
-                        from pptx import Presentation
-                        prs = Presentation(uploaded_file)
-                        slides_text = []
-                        for slide in prs.slides:
-                            for shape in slide.shapes:
-                                if hasattr(shape, "text"):
-                                    slides_text.append(shape.text)
-                        input_text = "\n".join(slides_text)
-
-                    elif fname.endswith((".jpg", ".jpeg", ".png")):
-                        from PIL import Image
-                        import pytesseract
-                        image = Image.open(uploaded_file)
-                        input_text = pytesseract.image_to_string(image)
 
                     else:
                         error = "Unsupported file type."
@@ -464,21 +455,21 @@ def textup(request):
         else:
             error = "Please paste some text or upload a supported file."
 
-        
         # 🔥 LIMIT TO 20,000 WORDS
-        
-        words = input_text.split()
+        if input_text:
+            words = input_text.split()
+            if len(words) > MAX_WORDS:
+                input_text = " ".join(words[:MAX_WORDS])
+                warning = "Text trimmed to first 20,000 words."
 
-        if len(words) > MAX_WORDS:
-            input_text = " ".join(words[:MAX_WORDS])
-            warning = "Text trimmed to first 20,000 words for performance."
-
+        # Optional translation
         if translator_pipeline and input_text and len(input_text) < 3000:
             try:
                 translated = translator_pipeline(input_text, max_length=3000)
                 input_text = translated[0]["translation_text"]
             except Exception:
                 logger.exception("Translation failed")
+
         # 3️⃣ GENERATE SUMMARY
         if input_text.strip() and not error:
             try:
@@ -490,6 +481,11 @@ def textup(request):
 
                 summary = notes
 
+                evaluation = evaluate_summary(
+                    input_text,
+                    summary["detailed_explanation"]
+                )
+
             except Exception as e:
                 logger.exception("Generation failed")
                 error = str(e)
@@ -497,7 +493,8 @@ def textup(request):
     return render(request, "textup.html", {
         "summary": summary,
         "error": error,
-        "warning": warning
+        "warning": warning,
+        "evaluation": evaluation
     })
 # ---------------------------
 # audio upload / ASR
@@ -509,6 +506,7 @@ def audio_upload(request):
 
     uploaded = None
     tmp_path = None
+
     try:
         if request.FILES.get("file"):
             uploaded = request.FILES["file"]
@@ -519,6 +517,7 @@ def audio_upload(request):
             tmp.flush()
             tmp.close()
             tmp_path = tmp.name
+
         elif request.FILES.get("recorded_blob"):
             uploaded = request.FILES["recorded_blob"]
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
@@ -532,7 +531,7 @@ def audio_upload(request):
 
         transcript = ""
 
-        # try whisper (transformers) first
+        # ------------- ASR (Whisper) -------------
         if asr_pipeline is not None:
             try:
                 out = asr_pipeline(tmp_path)
@@ -545,15 +544,8 @@ def audio_upload(request):
             except Exception:
                 logger.exception("ASR pipeline failed")
                 transcript = ""
-                # 🔥 Force English translation
-            #if translator_pipeline and transcript:
-             #   try:
-              #      translated = translator_pipeline(transcript, max_length=3000)
-               #     transcript = translated[0]["translation_text"]
-                #except Exception:
-                 #   logger.exception("Translation failed")
 
-        # fallback to speech_recognition + Google
+        # ------------- Google Fallback -------------
         if not transcript and SR_AVAILABLE:
             try:
                 r = sr.Recognizer()
@@ -565,68 +557,67 @@ def audio_upload(request):
                 transcript = ""
 
         if not transcript:
-            try:
-                if tmp_path and os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
-            except Exception:
-                pass
-            return JsonResponse({"success": False, "error": "Transcription failed. Try WAV/MP3 or ensure ffmpeg is installed."})
+            if tmp_path and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+            return JsonResponse({
+                "success": False,
+                "error": "Transcription failed. Try WAV/MP3 or ensure ffmpeg is installed."
+            })
 
+        # ------------- Clean Transcript -------------
         if len(transcript) > MAX_PROCESS_CHARS:
             transcript = transcript[:MAX_PROCESS_CHARS]
-            import re
 
-            # remove repeated words like "safe safe safe"
-            transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', transcript)
+        import re
+        transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', transcript)
+        transcript = re.sub(r'\b(ya|na|uh|um|hmm)\b', '', transcript, flags=re.IGNORECASE)
+        transcript = re.sub(r'\s+', ' ', transcript).strip()
 
-            # remove broken filler like "ya na ya na"
-            transcript = re.sub(r'\b(ya|na|uh|um|hmm)\b', '', transcript, flags=re.IGNORECASE)
-
-            # remove extra spaces
-            transcript = re.sub(r'\s+', ' ', transcript).strip()
-
+        # ------------- Generate Notes -------------
         summary_length = request.POST.get("summary_length", "medium")
-        try:
-            clean_input = f"""
-              The following is a transcript of an educational discussion.
 
-                Please create clear student-style structured notes.
+        clean_input = f"""
+        You are an academic note-making assistant.
 
-                Transcript:
-                {transcript}
-                """
+        From the transcript below:
+        - Create meaningful section headings based on actual topics.
+        - DO NOT use generic titles like "Main Topic 1".
+        - Use proper descriptive headings.
+        - Provide structured student notes.
 
-            notes = generate_fast_notes(clean_input, summary_length)
-        except Exception:
-            logger.exception("Note generation failed for audio transcript")
-            try:
-                if tmp_path and os.path.exists(tmp_path):
-                    os.unlink(tmp_path)
-            except Exception:
-                pass
-            return JsonResponse({"success": False, "error": "Failed to generate notes from transcript."})
+        Transcript:
+        {transcript}
+        """
+
+        notes = generate_fast_notes(clean_input, summary_length)
+
+        # ------------- ✅ EVALUATION ADDED -------------
+        evaluation = evaluate_summary(
+            transcript,
+            notes["detailed_explanation"]
+        )
 
         request.session["latest_notes"] = notes
         request.session.modified = True
 
-        try:
-            if tmp_path and os.path.exists(tmp_path):
-                os.unlink(tmp_path)
-        except Exception:
-            pass
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 
-        return JsonResponse({"success": True, "summary": notes, "transcript": transcript})
+        return JsonResponse({
+            "success": True,
+            "summary": notes,
+            "transcript": transcript,
+            "evaluation": evaluation   # 🔥 added
+        })
 
     except Exception:
         logger.exception("audio_upload error")
-        try:
-            if tmp_path and os.path.exists(tmp_path):
-                os.unlink(tmp_path)
-        except Exception:
-            pass
-        return JsonResponse({"success": False, "error": "Server error while processing audio."})
-
-
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
+        return JsonResponse({
+            "success": False,
+            "error": "Server error while processing audio."
+        })
 
 # ---------------------------
 # video upload / ASR
