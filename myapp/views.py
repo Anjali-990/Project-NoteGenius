@@ -394,7 +394,8 @@ def generate_fast_notes(text, summary_length="medium"):
 
     # Main Sections
     for i, section in enumerate(sections):
-        structured_output += f"\n\nMain Topic {i+1}\n\n{section}"
+        structured_output += f"\n\nMain Topic {i+1}\n"
+        structured_output += f"\n{section}\n"
 
 
     # Conclusion
@@ -503,15 +504,14 @@ def textup(request):
 
             if last_generated_notes and doubt_text:
                 prompt = f"""
-                Answer the question strictly using the notes below.
+Answer the question strictly using the notes below.
 
-                Notes:
-                {last_generated_notes}
+Notes:
+{last_generated_notes}
 
-                Question:
-                {doubt_text}
-                """
-
+Question:
+{doubt_text}
+"""
                 result = qna_model(prompt, max_length=400, do_sample=False)
 
                 return JsonResponse({
@@ -523,21 +523,19 @@ def textup(request):
             })
 
     return render(request, "textup.html", {
+        "success": True,
         "summary": summary,
-        "error": error,
-        "warning": warning,
         "evaluation": evaluation,
-        "input_text": input_text
+        "input_text": input_text,
+        "error": error,
+        "warning": warning
     })
-# ---------------------------
-# audio upload / ASR
 # ---------------------------
 @csrf_exempt
 def audio_upload(request):
     if request.method == "GET":
         return render(request, "audioup.html")
 
-    uploaded = None
     tmp_path = None
 
     try:
@@ -547,7 +545,6 @@ def audio_upload(request):
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
             for chunk in uploaded.chunks():
                 tmp.write(chunk)
-            tmp.flush()
             tmp.close()
             tmp_path = tmp.name
 
@@ -556,127 +553,63 @@ def audio_upload(request):
             tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
             for chunk in uploaded.chunks():
                 tmp.write(chunk)
-            tmp.flush()
             tmp.close()
             tmp_path = tmp.name
         else:
             return JsonResponse({"success": False, "error": "No audio received."})
 
+        # ---------------- ASR ----------------
         transcript = ""
 
-        # ------------- ASR (Whisper) -------------
-        if asr_pipeline is not None:
+        if asr_pipeline:
             try:
-                out = asr_pipeline(tmp_path)
-                if isinstance(out, dict) and "text" in out:
-                    transcript = out["text"]
-                elif isinstance(out, list) and out and "text" in out[0]:
-                    transcript = out[0]["text"]
-                else:
-                    transcript = str(out)
+                out = asr_pipeline(tmp_path, chunk_length_s=30)
+                transcript = out.get("text", "")
             except Exception:
-                logger.exception("ASR pipeline failed")
-                transcript = ""
-
-        # ------------- Google Fallback -------------
-        if not transcript and SR_AVAILABLE:
-            try:
-                r = sr.Recognizer()
-                with sr.AudioFile(tmp_path) as source:
-                    audio = r.record(source)
-                transcript = r.recognize_google(audio)
-            except Exception:
-                logger.exception("SpeechRecognition failed")
-                transcript = ""
+                logger.exception("Whisper failed")
 
         if not transcript:
-            if tmp_path and os.path.exists(tmp_path):
-                os.unlink(tmp_path)
             return JsonResponse({
                 "success": False,
-                "error": "Transcription failed. Try WAV/MP3 or ensure ffmpeg is installed."
+                "error": "Transcription failed."
             })
 
-        # ------------- Clean Transcript -------------
-        if len(transcript) > MAX_PROCESS_CHARS:
-            transcript = transcript[:MAX_PROCESS_CHARS]
-
-        import re
-        transcript = re.sub(r'\b(\w+)( \1\b)+', r'\1', transcript)
-        transcript = re.sub(r'\b(ya|na|uh|um|hmm)\b', '', transcript, flags=re.IGNORECASE)
+        # ---------------- Clean ----------------
         transcript = re.sub(r'\s+', ' ', transcript).strip()
 
-        # ------------- Generate Notes -------------
+        print("TRANSCRIPT LENGTH:", len(transcript))
+        print("TRANSCRIPT SAMPLE:", transcript[:200])
+
+        # ---------------- Generate Notes ----------------
         summary_length = request.POST.get("summary_length", "medium")
+        notes = generate_fast_notes(transcript, summary_length)
 
-        clean_input = f"""
-        You are an academic note-making assistant.
-
-        From the transcript below:
-        - Create meaningful section headings based on actual topics.
-        - DO NOT use generic titles like "Main Topic 1".
-        - Use proper descriptive headings.
-        - Provide structured student notes.
-
-        Transcript:
-        {transcript}
-        """
-
-        notes = generate_fast_notes(clean_input, summary_length)
-
-        # ------------- ✅ EVALUATION ADDED -------------
         evaluation = evaluate_summary(
             transcript,
             notes["detailed_explanation"]
         )
 
+        # Save to session
         request.session["latest_notes"] = notes
         request.session.modified = True
-
-        if tmp_path and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
-
-        last_generated_notes = notes["detailed_explanation"]
-        if "doubt" in request.POST:
-            doubt_text = request.POST.get("doubt")
-
-            if last_generated_notes and doubt_text:
-                prompt = f"""
-        Answer the question strictly using the notes below.
-
-        Notes:
-        {last_generated_notes}
-
-        Question:
-        {doubt_text}
-        """
-
-            result = qna_model(prompt, max_length=400, do_sample=False)
-
-            return JsonResponse({
-                "doubt_answer": result[0]["generated_text"]
-            })
-
-        return JsonResponse({
-            "doubt_answer": "No notes available."
-        })
 
         return JsonResponse({
             "success": True,
             "summary": notes,
             "transcript": transcript,
-            "evaluation": evaluation   # 🔥 added
+            "evaluation": evaluation
         })
 
-    except Exception:
+    except Exception as e:
         logger.exception("audio_upload error")
-        if tmp_path and os.path.exists(tmp_path):
-            os.unlink(tmp_path)
         return JsonResponse({
             "success": False,
-            "error": "Server error while processing audio."
+            "error": str(e)
         })
 
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.unlink(tmp_path)
 # ---------------------------
 # video upload / ASR
 # ---------------------------
@@ -753,14 +686,17 @@ def video_upload(request):
         tmp_audio_path = tmp_audio.name
         tmp_audio.close()
 
-        clip.audio.write_audiofile(tmp_audio_path)
+        # Only first 120 seconds process karo
+        subclip = clip.subclip(0, 120)
+        subclip.audio.write_audiofile(tmp_audio_path)
+        subclip.close()
         clip.close()
 
         # 🔥 Transcribe
         transcript = ""
 
         if asr_pipeline:
-            out = asr_pipeline(tmp_audio_path)
+            out = asr_pipeline(tmp_audio_path, chunk_length_s=30)
             transcript = out.get("text", "")
 
         if not transcript:
