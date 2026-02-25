@@ -32,6 +32,7 @@ from rouge_score import rouge_scorer
 last_generated_video_notes = ""
 # models
 from .models import Profile, EmailOTP, Notes
+qna_model = None
 
 # file / office handling
 import PyPDF2
@@ -68,7 +69,6 @@ translator_pipeline = None
 
 device = 0 if torch.cuda.is_available() else -1
 
-qna_model = pipeline("text2text-generation", model="google/flan-t5-base", framework="pt", device=0)
 
 try:
     summarizer = pipeline(
@@ -998,6 +998,14 @@ last_generated_qna = ""
 
 def qna_upload(request):
     global stored_context, last_generated_qna
+    global qna_model
+
+    if 'qna_model' not in globals() or qna_model is None:
+        qna_model = pipeline(
+            "text2text-generation",
+             model="google/flan-t5-base",
+            device=device
+        )
 
     if request.method == "GET":
         return render(request, "QnA.html")
@@ -1076,16 +1084,11 @@ Provide a clear explanation.
                 clean_chunk = re.sub(r'\s+', ' ', clean_chunk).strip()
 
                 prompt = f"""
-Generate ONE clear academic question and its detailed answer 
-based strictly on the text below.
+Read the text carefully and create ONE meaningful conceptual question 
+and a clear professional answer based only on the information provided.
 
-Format strictly as:
-
-Question:
-<question>
-
-Answer:
-<answer>
+The question must test understanding.
+The answer must be complete and well-written.
 
 Text:
 {clean_chunk}
@@ -1095,19 +1098,30 @@ Text:
                     prompt,
                     max_length=300,
                     min_length=80,
-                    do_sample=False,        # 🔥 deterministic = less garbage
+                    do_sample=True,        # 🔥 deterministic = less garbage
                     repetition_penalty=1.3
                 )
 
-                generated = result[0]["generated_text"]
+                generated = result[0]["generated_text"].strip()
 
-                # 🔥 Force structure
-                if "Question:" not in generated:
-                    continue
-                if "Answer:" not in generated:
-                    continue
+        # Split safely
+                parts = generated.split("Answer:")
 
-                all_qna += f"Q{count}. {generated}\n\n---\n\n"
+                if len(parts) >= 2:
+                    question_part = parts[0].replace("Question:", "").strip()
+                    answer_part = parts[1].strip()
+                else:
+        # fallback if model didn't format properly
+                    question_part = generated[:120].strip()
+                    answer_part = generated.strip()
+
+                all_qna += f"""Q{count}.
+                Question: {question_part}
+
+                Answer: {answer_part}
+
+                ---
+                \n"""
                 count += 1
 
             last_generated_qna = all_qna
@@ -1122,6 +1136,7 @@ Text:
         return JsonResponse({"qna": "No valid content provided."})
 
 import re
+
 
 def evaluate_qna(qna_text, original_text):
     questions = re.findall(r"Q[:\d]*\s*(.*?)[\n]", qna_text)
