@@ -1,4 +1,7 @@
 # myapp/views.py
+import certifi
+import ssl
+
 import os
 import io
 import json
@@ -26,7 +29,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from transformers import pipeline
 from rouge_score import rouge_scorer
-
+last_generated_video_notes = ""
 # models
 from .models import Profile, EmailOTP, Notes
 
@@ -40,6 +43,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 import fitz
 
 import pytesseract
+
+
+ssl._create_default_https_context = ssl.create_default_context
+ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=certifi.where())
 
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 MAX_WORDS = 20000
@@ -490,11 +497,37 @@ def textup(request):
                 logger.exception("Generation failed")
                 error = str(e)
 
+        last_generated_notes = summary.get("detailed_explanation", "")
+        if "doubt" in request.POST:
+            doubt_text = request.POST.get("doubt")
+
+            if last_generated_notes and doubt_text:
+                prompt = f"""
+                Answer the question strictly using the notes below.
+
+                Notes:
+                {last_generated_notes}
+
+                Question:
+                {doubt_text}
+                """
+
+                result = qna_model(prompt, max_length=400, do_sample=False)
+
+                return JsonResponse({
+                    "doubt_answer": result[0]["generated_text"]
+                })
+
+            return JsonResponse({
+                "doubt_answer": "No notes available."
+            })
+
     return render(request, "textup.html", {
         "summary": summary,
         "error": error,
         "warning": warning,
-        "evaluation": evaluation
+        "evaluation": evaluation,
+        "input_text": input_text
     })
 # ---------------------------
 # audio upload / ASR
@@ -603,6 +636,31 @@ def audio_upload(request):
         if tmp_path and os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
+        last_generated_notes = notes["detailed_explanation"]
+        if "doubt" in request.POST:
+            doubt_text = request.POST.get("doubt")
+
+            if last_generated_notes and doubt_text:
+                prompt = f"""
+        Answer the question strictly using the notes below.
+
+        Notes:
+        {last_generated_notes}
+
+        Question:
+        {doubt_text}
+        """
+
+            result = qna_model(prompt, max_length=400, do_sample=False)
+
+            return JsonResponse({
+                "doubt_answer": result[0]["generated_text"]
+            })
+
+        return JsonResponse({
+            "doubt_answer": "No notes available."
+        })
+
         return JsonResponse({
             "success": True,
             "summary": notes,
@@ -622,37 +680,74 @@ def audio_upload(request):
 # ---------------------------
 # video upload / ASR
 # ---------------------------
+
 @csrf_exempt
 def video_upload(request):
+
     if request.method == "GET":
         return render(request, "videoup.html")
+
+    # 🔥 1️⃣ HANDLE DOUBT FIRST
+    if request.POST.get("doubt"):
+
+        doubt_text = request.POST.get("doubt")
+        last_notes = request.session.get("latest_notes")
+
+        if not last_notes:
+            return JsonResponse({
+                "doubt_answer": "No video notes available."
+            })
+
+        prompt = f"""
+        Answer strictly using the notes below.
+
+        Notes:
+        {last_notes.get("detailed_explanation", "")}
+
+        Question:
+        {doubt_text}
+        """
+
+        result = qna_model(prompt, max_length=400, do_sample=False)
+
+        return JsonResponse({
+            "doubt_answer": result[0]["generated_text"]
+        })
+
 
     tmp_video_path = None
     tmp_audio_path = None
 
     try:
+        # 🔥 2️⃣ HANDLE VIDEO UPLOAD
         if not request.FILES.get("file"):
-            return JsonResponse({"success": False, "error": "No video received."})
+            return JsonResponse({
+                "success": False,
+                "error": "No video received."
+            })
 
         uploaded = request.FILES["file"]
 
-        # 🔹 Save video temporarily
         suffix = os.path.splitext(uploaded.name)[1] or ".mp4"
         tmp_video = tempfile.NamedTemporaryFile(delete=False, suffix=suffix)
+
         for chunk in uploaded.chunks():
             tmp_video.write(chunk)
-        tmp_video.flush()
+
         tmp_video.close()
         tmp_video_path = tmp_video.name
 
-        # 🔹 Extract audio from video
+        # 🔥 Extract audio
         from moviepy.editor import VideoFileClip
 
         clip = VideoFileClip(tmp_video_path)
 
         if clip.audio is None:
             clip.close()
-            return JsonResponse({"success": False, "error": "No audio track found in video."})
+            return JsonResponse({
+                "success": False,
+                "error": "No audio track found in video."
+            })
 
         tmp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
         tmp_audio_path = tmp_audio.name
@@ -661,53 +756,56 @@ def video_upload(request):
         clip.audio.write_audiofile(tmp_audio_path)
         clip.close()
 
-        # 🔹 Transcription using existing ASR
+        # 🔥 Transcribe
         transcript = ""
 
-        if asr_pipeline is not None:
-            try:
-                out = asr_pipeline(tmp_audio_path)
-                if isinstance(out, dict) and "text" in out:
-                    transcript = out["text"]
-                elif isinstance(out, list) and out and "text" in out[0]:
-                    transcript = out[0]["text"]
-            except Exception:
-                logger.exception("Video ASR failed")
-                transcript = ""
+        if asr_pipeline:
+            out = asr_pipeline(tmp_audio_path)
+            transcript = out.get("text", "")
 
         if not transcript:
-            return JsonResponse({"success": False, "error": "Transcription failed."})
+            return JsonResponse({
+                "success": False,
+                "error": "Transcription failed."
+            })
 
         if len(transcript) > MAX_PROCESS_CHARS:
             transcript = transcript[:MAX_PROCESS_CHARS]
 
-        # 🔹 Generate summary
+        # 🔥 Generate notes
         summary_length = request.POST.get("summary_length", "medium")
         notes = generate_fast_notes(transcript, summary_length)
 
-        # 🔥 VERY IMPORTANT (for download buttons)
+        evaluation = evaluate_summary(
+            transcript,
+            notes["detailed_explanation"]
+        )
+
+        # 🔥 SAVE TO SESSION (very important)
         request.session["latest_notes"] = notes
         request.session.modified = True
 
         return JsonResponse({
             "success": True,
             "summary": notes,
-            "transcript": transcript
+            "transcript": transcript,
+            "evaluation": evaluation
         })
 
     except Exception as e:
         logger.exception("Video processing failed")
-        return JsonResponse({"success": False, "error": str(e)})
+        return JsonResponse({
+            "success": False,
+            "error": str(e)
+        })
 
     finally:
-        # 🔹 Cleanup temp files
         for path in [tmp_video_path, tmp_audio_path]:
             try:
                 if path and os.path.exists(path):
                     os.unlink(path)
             except Exception:
                 pass
-
 #yt linkupload
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -920,13 +1018,6 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from .models import Notes   # 👈 make sure your saved notes model name is correct
 
-qna_model = pipeline(
-    "text2text-generation",
-    model="google/flan-t5-base",   # base use kar rahe hain
-    device=0  # GPU (since you have RTX 3050)
-)
-
-
 # ---------------------------
 # Helper: Extract Text
 # ---------------------------
@@ -1023,10 +1114,6 @@ Provide a clear explanation.
                 "doubt_answer": "No document context available."
             })
 
-
-        # --------------------
-        # 3️⃣ QnA GENERATION (Fixed Loop & Prompt)
-        # --------------------
         # --------------------
         # 3️⃣ QnA GENERATION (T5-Optimized)
         # --------------------
@@ -1037,48 +1124,188 @@ Provide a clear explanation.
         if content:
             stored_context = content
             # We use smaller chunks (1000 chars) to ensure the model focuses
-            chunks = split_into_chunks(content, chunk_size=1000) 
+            chunks = split_into_chunks(content, chunk_size=1000)
             
             all_qna = ""
             count = 1
 
             for chunk in chunks:
-                if count > 12: break # Stop once we hit your limit
-                
-                # We use a very "Forceful" prompt that T5 understands
-                # T5-base responds best to: "question: [text] answer: [text]" patterns
-                prompt = f"Using this text, generate a question and a detailed answer. Text: {chunk}"
+
+                if count > 10:
+                    break
+
+                # 🔥 Clean citations & junk before sending to model
+                clean_chunk = re.sub(r'\(.*?\)', '', chunk)   # remove brackets
+                clean_chunk = re.sub(r'http\S+', '', clean_chunk)  # remove links
+                clean_chunk = re.sub(r'\s+', ' ', clean_chunk).strip()
+
+                prompt = f"""
+Generate ONE clear academic question and its detailed answer 
+based strictly on the text below.
+
+Format strictly as:
+
+Question:
+<question>
+
+Answer:
+<answer>
+
+Text:
+{clean_chunk}
+"""
 
                 result = qna_model(
-                    prompt, 
-                    max_length=400, 
-                    min_length=30,
-                    do_sample=True,
-                    temperature=0.7,
-                    repetition_penalty=1.2
+                    prompt,
+                    max_length=300,
+                    min_length=80,
+                    do_sample=False,        # 🔥 deterministic = less garbage
+                    repetition_penalty=1.3
                 )
 
-                generated_text = result[0]["generated_text"]
-                
-                # T5 often merges Q and A. We clean it up for your UI
-                # Most T5 outputs look like: "question: what is AI? answer: AI is..."
-                cleaned_output = generated_text.replace("question:", f"Q{count}:").replace("answer:", "\nAnswer:")
-                
-                # If the model didn't include "Q:" or "Answer:", we force the format
-                if "Q" not in cleaned_output:
-                    cleaned_output = f"Q{count}: " + cleaned_output.replace("?", "?\nAnswer: ")
+                generated = result[0]["generated_text"]
 
-                all_qna += cleaned_output + "\n\n---\n\n"
+                # 🔥 Force structure
+                if "Question:" not in generated:
+                    continue
+                if "Answer:" not in generated:
+                    continue
+
+                all_qna += f"Q{count}. {generated}\n\n---\n\n"
                 count += 1
 
             last_generated_qna = all_qna
+            evaluation = evaluate_qna(all_qna, stored_context)
 
-            return JsonResponse({"qna": all_qna})
+            return JsonResponse({
+                "success": True,
+                "qna": all_qna,
+                "evaluation": evaluation
+            })
 
         return JsonResponse({"qna": "No valid content provided."})
 
+import re
+
+def evaluate_qna(qna_text, original_text):
+    questions = re.findall(r"Q[:\d]*\s*(.*?)[\n]", qna_text)
+    answers = re.findall(r"Answer:\s*(.*?)(?=\nQ|$)", qna_text, re.DOTALL)
+
+    total_q = len(questions)
+    unique_q = len(set(questions))
+
+    # redundancy score
+    redundancy = round((unique_q / total_q) * 100, 2) if total_q else 0
+
+    # simple consistency check
+    match_count = 0
+    for ans in answers:
+        if ans.strip()[:30] in original_text:
+            match_count += 1
+
+    consistency = round((match_count / len(answers)) * 100, 2) if answers else 0
+
+    # coverage proxy
+    coverage = round((len(answers) / total_q) * 100, 2) if total_q else 0
+
+    return {
+        "redundancy": redundancy,
+        "consistency": consistency,
+        "coverage": coverage
+    }
+
+@csrf_exempt
 def quiz_upload(request):
-    return render(request, "Quiz.html")
+
+    if request.method == "GET":
+        return render(request, "Quiz.html")
+
+    if request.method == "POST":
+
+        uploaded_file = request.FILES.get("file")
+        text_input = request.POST.get("text")
+        content = ""
+
+        # 1️⃣ TEXT INPUT
+        if text_input:
+            content = text_input
+
+        # 2️⃣ FILE HANDLING
+        elif uploaded_file:
+
+            name = uploaded_file.name.lower()
+
+            # PDF
+            if name.endswith(".pdf"):
+                content = extract_text(uploaded_file)
+
+            # DOCX / TXT
+            elif name.endswith((".docx", ".doc", ".txt")):
+                content = extract_text(uploaded_file)
+
+            # IMAGE → OCR
+            elif name.endswith((".png", ".jpg", ".jpeg")):
+                image = Image.open(uploaded_file)
+                content = pytesseract.image_to_string(image)
+
+            # AUDIO
+            elif name.endswith((".mp3", ".wav", ".m4a")):
+                tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+                for chunk in uploaded_file.chunks():
+                    tmp.write(chunk)
+                tmp.close()
+                result = asr_pipeline(tmp.name)
+                content = result.get("text", "")
+
+            # VIDEO
+            elif name.endswith((".mp4", ".mkv", ".mov")):
+                from moviepy.editor import VideoFileClip
+
+                tmp_video = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
+                for chunk in uploaded_file.chunks():
+                    tmp_video.write(chunk)
+                tmp_video.close()
+
+                clip = VideoFileClip(tmp_video.name)
+
+                tmp_audio = tempfile.NamedTemporaryFile(delete=False, suffix=".wav")
+                clip.audio.write_audiofile(tmp_audio.name)
+                clip.close()
+
+                result = asr_pipeline(tmp_audio.name)
+                content = result.get("text", "")
+
+        if not content:
+            return JsonResponse({"success": False, "error": "No content extracted."})
+
+        # 3️⃣ GENERATE QUIZ
+        prompt = f"""
+Generate 10 multiple choice questions from the text below.
+
+Return STRICT JSON format:
+[
+ {{
+  "question": "...",
+  "options": ["A","B","C","D"],
+  "correct": 0
+ }}
+]
+
+Text:
+{content[:3000]}
+"""
+
+        result = qna_model(prompt, max_length=1500, do_sample=False)
+
+        try:
+            quiz_json = json.loads(result[0]["generated_text"])
+        except:
+            return JsonResponse({"success": False, "error": "Quiz generation failed."})
+
+        return JsonResponse({
+            "success": True,
+            "quiz": quiz_json
+        })
 
 
 def profile(request):
