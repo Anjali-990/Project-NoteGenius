@@ -61,14 +61,13 @@ except Exception:
 # transformers summarizer / asr
 import torch
 
+device = 0 if torch.cuda.is_available() else -1
+
 logger = logging.getLogger(__name__)
 
 summarizer = None
 asr_pipeline = None
 translator_pipeline = None
-
-device = 0 if torch.cuda.is_available() else -1
-
 
 try:
     summarizer = pipeline(
